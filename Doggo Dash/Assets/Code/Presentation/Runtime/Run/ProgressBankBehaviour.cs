@@ -8,7 +8,6 @@ namespace Game.Presentation.Runtime.Run
     public sealed class ProgressBankBehaviour : MonoBehaviour
     {
         [Header("Refs")]
-        public RunStateControllerBehaviour runState = default!;
         public RunRewardTrackerBehaviour runRewards = default!;
         public ScoreDistanceControllerBehaviour scoreDistance = default!;
 
@@ -18,9 +17,9 @@ namespace Game.Presentation.Runtime.Run
         public TMP_Text bestScoreText;
         public TMP_Text bestDistanceText;
 
-        private IProgressSaveGateway _save = default!;
-        private PlayerProgressData _data = default!;
-        private bool _bankedThisFail;
+        private IProgressSaveGateway _save;
+        private PlayerProgressData _data;
+        private bool _bankedForThisGameOver;
 
         public PlayerProgressData Data => _data;
 
@@ -31,23 +30,24 @@ namespace Game.Presentation.Runtime.Run
             RefreshUI();
         }
 
-        private void Update()
+        public void ResetForNewRun()
         {
-            if (runState == null) return;
+            _bankedForThisGameOver = false;
+        }
 
-            if (!runState.IsFailed)
-            {
-                _bankedThisFail = false;
-                return;
-            }
+        public bool BankNow(int rewardMultiplier)
+        {
+            if (_bankedForThisGameOver) return false;
+            _bankedForThisGameOver = true;
 
-            if (_bankedThisFail) return;
-            _bankedThisFail = true;
+            rewardMultiplier = Mathf.Max(1, rewardMultiplier);
+
+            _data = _save.Load();
 
             if (runRewards != null)
             {
-                _data.totalKibble += runRewards.Kibble;
-                _data.totalGems += runRewards.Gems;
+                _data.totalKibble += runRewards.Kibble * rewardMultiplier;
+                _data.totalGems += runRewards.Gems * rewardMultiplier;
             }
 
             if (scoreDistance != null)
@@ -61,18 +61,12 @@ namespace Game.Presentation.Runtime.Run
 
             _save.Save(_data);
             RefreshUI();
+            return true;
         }
 
         public void ForceReload()
         {
             _data = _save.Load();
-            RefreshUI();
-        }
-
-        public void ResetProgressForTesting()
-        {
-            _data = new PlayerProgressData();
-            _save.Save(_data);
             RefreshUI();
         }
 
