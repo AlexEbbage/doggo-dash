@@ -11,5 +11,11 @@ namespace Game.Application.Ports
     {
         public int totalKibble;
         public int totalGems;
+
+        public int bestScore;
+        public float bestDistanceMeters;
+
+        public string selectedPetId = "dog_default";
+        public string selectedOutfitId = "outfit_default";
     }
 }

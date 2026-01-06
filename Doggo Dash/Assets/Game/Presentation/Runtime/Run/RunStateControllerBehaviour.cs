@@ -2,16 +2,20 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using Game.Application.Ports;
 using Game.Domain.ValueObjects;
+using Game.Presentation.Runtime.FX;
 
 namespace Game.Presentation.Runtime.Run
 {
-    /// <summary>
-    /// Hardened run-state controller: stop runner on fail; restart via scene reload.
-    /// </summary>
     public sealed class RunStateControllerBehaviour : MonoBehaviour, IRunFailSink
     {
         [Header("Refs")]
-        public MonoBehaviour runnerControllerBehaviour = default!; // RunnerControllerBehaviour
+        public MonoBehaviour runnerControllerBehaviour = default!;
+        public MonoBehaviour collisionReporterBehaviour = default!;
+
+        [Header("Feedback (optional)")]
+        public RunFeedbackControllerBehaviour feedback;
+
+        [Header("Debug")]
         public bool freezeTimeOnFail = false;
 
         public bool IsFailed { get; private set; }
@@ -25,6 +29,8 @@ namespace Game.Presentation.Runtime.Run
 
             if (runnerControllerBehaviour != null)
                 runnerControllerBehaviour.enabled = false;
+
+            feedback?.PlayGameOver();
 
             if (freezeTimeOnFail)
                 Time.timeScale = 0f;

@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Game.Domain.ValueObjects;
 using Game.Presentation.Runtime.World.Track;
+using Game.Presentation.Runtime.Run;
 
 namespace Game.Presentation.Runtime.World.Pickups
 {
@@ -11,6 +12,9 @@ namespace Game.Presentation.Runtime.World.Pickups
         [Header("Config")]
         public PickupCatalogSO catalog = default!;
         public PickupPatternSO pattern = default!;
+
+        [Header("Difficulty (optional)")]
+        public RunDifficultyControllerBehaviour difficulty;
 
         [Header("Spawn")]
         public Transform? spawnedRoot;
@@ -25,6 +29,7 @@ namespace Game.Presentation.Runtime.World.Pickups
             {
                 Debug.LogError("[SegmentPickupSpawner] Must be on same GameObject as TrackSegmentBehaviour.");
                 enabled = false;
+                return;
             }
         }
 
@@ -39,20 +44,32 @@ namespace Game.Presentation.Runtime.World.Pickups
             if (catalog == null || pattern == null || pattern.rows == null) return;
 
             Transform root = spawnedRoot != null ? spawnedRoot : transform;
+            float density = difficulty != null ? difficulty.DensityMultiplier : 1f;
 
             foreach (var row in pattern.rows)
             {
+                if (row == null) continue;
                 if (!catalog.TryGetPrefab(row.type, out var prefab)) continue;
 
-                TrySpawn(prefab, row, root, PickupLaneMask.Left, _segment.laneSockets.left);
-                TrySpawn(prefab, row, root, PickupLaneMask.Middle, _segment.laneSockets.middle);
-                TrySpawn(prefab, row, root, PickupLaneMask.Right, _segment.laneSockets.right);
+                if (density < 1f && Random.value > density)
+                    continue;
+
+                TrySpawnInLaneMask(prefab, row, root, PickupLaneMask.Left, -1);
+                TrySpawnInLaneMask(prefab, row, root, PickupLaneMask.Middle, 0);
+                TrySpawnInLaneMask(prefab, row, root, PickupLaneMask.Right, +1);
             }
         }
 
-        private void TrySpawn(PickupView prefab, PickupPatternSO.Row row, Transform root, PickupLaneMask laneFlag, Transform laneAnchor)
+        private void TrySpawnInLaneMask(PickupView prefab, PickupPatternSO.Row row, Transform root, PickupLaneMask laneFlag, int laneIndex)
         {
             if ((row.lanes & laneFlag) == 0) return;
+
+            Transform laneAnchor = laneIndex switch
+            {
+                -1 => _segment!.laneSockets!.left,
+                0 => _segment!.laneSockets!.middle,
+                _ => _segment!.laneSockets!.right
+            };
 
             Vector3 pos = laneAnchor.position + new Vector3(0f, 0.5f, row.zOffset);
             var inst = Instantiate(prefab, pos, prefab.transform.rotation, root);
@@ -66,7 +83,10 @@ namespace Game.Presentation.Runtime.World.Pickups
         private void Cleanup()
         {
             for (int i = 0; i < _spawned.Count; i++)
-                if (_spawned[i] != null) Destroy(_spawned[i]);
+            {
+                if (_spawned[i] != null)
+                    Destroy(_spawned[i]);
+            }
             _spawned.Clear();
         }
     }
