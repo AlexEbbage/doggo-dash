@@ -7,7 +7,7 @@ namespace Game.Presentation.Runtime.Camera
     {
         [Header("Refs")]
         public Transform runner = default!;
-        public Camera cam = default!;
+        public UnityEngine.Camera cam = default!;
         public MonoBehaviour zoomiesBehaviour; // assign ZoomiesControllerBehaviour (optional)
         public RunStateControllerBehaviour runState = default!;
 
