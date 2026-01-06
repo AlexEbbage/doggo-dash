@@ -9,7 +9,6 @@ namespace Game.Presentation.Runtime.Pooling
         private void Awake()
         {
             var monos = GetComponentsInChildren<MonoBehaviour>(true);
-
             int count = 0;
             for (int i = 0; i < monos.Length; i++)
                 if (monos[i] is IPoolable) count++;

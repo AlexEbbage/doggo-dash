@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using Game.Application.DTOs;
-using Game.Domain.Entities;
 using Game.Domain.ValueObjects;
 using Game.Application.Ports;
 
@@ -14,9 +13,9 @@ namespace Game.Application.Services
         public sealed class ActiveMission
         {
             public MissionDefinitionData Definition;
-            public MissionProgress Progress;
+            public Game.Domain.Entities.MissionProgress Progress;
 
-            public ActiveMission(MissionDefinitionData def, MissionProgress prog)
+            public ActiveMission(MissionDefinitionData def, Game.Domain.Entities.MissionProgress prog)
             {
                 Definition = def;
                 Progress = prog;
@@ -33,7 +32,6 @@ namespace Game.Application.Services
             _active.Clear();
             if (pool == null || pool.Length == 0) return;
 
-            // Weighted unique selection by MissionType
             var weighted = new List<int>(pool.Length * 2);
             for (int i = 0; i < pool.Length; i++)
             {
@@ -51,7 +49,7 @@ namespace Game.Application.Services
                 if (chosen.Contains(def.Type)) continue;
 
                 chosen.Add(def.Type);
-                _active.Add(new ActiveMission(def, new MissionProgress(def.Type, def.Target)));
+                _active.Add(new ActiveMission(def, new Game.Domain.Entities.MissionProgress(def.Type, def.Target)));
             }
         }
 
@@ -75,7 +73,7 @@ namespace Game.Application.Services
                     DisplayName = s.displayName ?? s.type.ToString()
                 };
 
-                var prog = new MissionProgress(s.type, s.target, s.current, s.completed);
+                var prog = new Game.Domain.Entities.MissionProgress(s.type, s.target, s.current, s.completed);
                 _active.Add(new ActiveMission(def, prog));
             }
         }
@@ -114,13 +112,6 @@ namespace Game.Application.Services
                 if (!before && a.Progress.Completed)
                     OnMissionCompleted?.Invoke(a);
             }
-        }
-
-        public bool AreAllCompleted()
-        {
-            for (int i = 0; i < _active.Count; i++)
-                if (!_active[i].Progress.Completed) return false;
-            return true;
         }
     }
 }
