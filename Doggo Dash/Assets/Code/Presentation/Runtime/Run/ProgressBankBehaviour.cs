@@ -10,17 +10,19 @@ namespace Game.Presentation.Runtime.Run
         [Header("Refs")]
         public RunStateControllerBehaviour runState = default!;
         public RunRewardTrackerBehaviour runRewards = default!;
+        public ScoreDistanceControllerBehaviour scoreDistance = default!;
 
         [Header("Optional UI")]
         public TMP_Text totalKibbleText;
         public TMP_Text totalGemsText;
+        public TMP_Text bestScoreText;
+        public TMP_Text bestDistanceText;
 
         private IProgressSaveGateway _save = default!;
         private PlayerProgressData _data = default!;
         private bool _bankedThisFail;
 
-        public int TotalKibble => _data.totalKibble;
-        public int TotalGems => _data.totalGems;
+        public PlayerProgressData Data => _data;
 
         private void Awake()
         {
@@ -46,9 +48,25 @@ namespace Game.Presentation.Runtime.Run
             {
                 _data.totalKibble += runRewards.Kibble;
                 _data.totalGems += runRewards.Gems;
-                _save.Save(_data);
-                RefreshUI();
             }
+
+            if (scoreDistance != null)
+            {
+                int score = scoreDistance.Score;
+                float dist = scoreDistance.DistanceMeters;
+
+                if (score > _data.bestScore) _data.bestScore = score;
+                if (dist > _data.bestDistanceMeters) _data.bestDistanceMeters = dist;
+            }
+
+            _save.Save(_data);
+            RefreshUI();
+        }
+
+        public void ForceReload()
+        {
+            _data = _save.Load();
+            RefreshUI();
         }
 
         public void ResetProgressForTesting()
@@ -62,6 +80,8 @@ namespace Game.Presentation.Runtime.Run
         {
             if (totalKibbleText != null) totalKibbleText.text = $"{_data.totalKibble}";
             if (totalGemsText != null) totalGemsText.text = $"{_data.totalGems}";
+            if (bestScoreText != null) bestScoreText.text = $"{_data.bestScore}";
+            if (bestDistanceText != null) bestDistanceText.text = $"{Mathf.FloorToInt(_data.bestDistanceMeters)}m";
         }
     }
 }

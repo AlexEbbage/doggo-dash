@@ -2,6 +2,7 @@ using UnityEngine;
 using Game.Application.Ports;
 using Game.Domain.ValueObjects;
 using Game.Presentation.Runtime.World.Obstacles;
+using Game.Presentation.Runtime.Run;
 
 namespace Game.Presentation.Runtime.Runner
 {
@@ -9,7 +10,14 @@ namespace Game.Presentation.Runtime.Runner
     public sealed class RunnerCollisionReporter : MonoBehaviour
     {
         [Header("Wiring")]
-        public MonoBehaviour failSinkBehaviour = default!; // must implement IRunFailSink
+        [Tooltip("Must implement IRunFailSink (RunStateControllerBehaviour).")]
+        public MonoBehaviour failSinkBehaviour = default!;
+
+        [Tooltip("Runner controller that exposes IsJumping/IsSliding. (RunnerControllerBehaviour)")]
+        public RunnerControllerBehaviour runnerController = default!;
+
+        [Tooltip("Optional: if assigned, unsafe hits trigger stumble instead of instant fail (per config).")]
+        public StumbleControllerBehaviour stumbleController;
 
         private IRunFailSink _failSink = default!;
         private bool _hasFailed;
@@ -21,6 +29,14 @@ namespace Game.Presentation.Runtime.Runner
             {
                 Debug.LogError("[RunnerCollisionReporter] failSinkBehaviour must implement IRunFailSink.");
                 enabled = false;
+                return;
+            }
+
+            if (runnerController == null)
+            {
+                Debug.LogError("[RunnerCollisionReporter] runnerController is not assigned.");
+                enabled = false;
+                return;
             }
         }
 
@@ -30,13 +46,49 @@ namespace Game.Presentation.Runtime.Runner
             if (hit.collider == null) return;
             if (hit.collider.isTrigger) return;
 
-            if (hit.collider.TryGetComponent<ObstacleView>(out var obstacle) && obstacle.isFatal)
+            // Ground ignore
+            if (hit.moveDirection.y > 0.5f) return;
+
+            if (!hit.collider.TryGetComponent<ObstacleView>(out var obstacle))
+                return;
+
+            if (!obstacle.isFatal)
+                return;
+
+            bool safe = IsSafeAgainstObstacle(obstacle);
+            if (safe) return;
+
+            if (stumbleController != null && stumbleController.config != null && stumbleController.config.useStumble)
             {
-                _hasFailed = true;
-                _failSink.OnRunFailed(RunFailReason.ObstacleHit, obstacle.obstacleType);
+                if (stumbleController.ShouldFailOnHitDuringInvuln())
+                {
+                    _hasFailed = true;
+                    _failSink.OnRunFailed(RunFailReason.ObstacleHit, obstacle.obstacleType);
+                    return;
+                }
+
+                stumbleController.TriggerStumble();
+                return;
             }
+
+            _hasFailed = true;
+            _failSink.OnRunFailed(RunFailReason.ObstacleHit, obstacle.obstacleType);
         }
 
-        public void ResetFailedState() => _hasFailed = false;
+        private bool IsSafeAgainstObstacle(ObstacleView obstacle)
+        {
+            return obstacle.obstacleType switch
+            {
+                ObstacleType.Low => runnerController.IsJumping,
+                ObstacleType.High => runnerController.IsSliding,
+                ObstacleType.FullBlock => false,
+                _ => false
+            };
+        }
+
+        public void ResetFailedState()
+        {
+            _hasFailed = false;
+        }
     }
 }

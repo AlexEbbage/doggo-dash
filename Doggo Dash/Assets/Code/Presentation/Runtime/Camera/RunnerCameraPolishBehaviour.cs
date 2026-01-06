@@ -8,7 +8,7 @@ namespace Game.Presentation.Runtime.Camera
         [Header("Refs")]
         public Transform runner = default!;
         public Camera cam = default!;
-        public ZoomiesControllerBehaviour zoomies = default!;
+        public MonoBehaviour zoomiesBehaviour; // assign ZoomiesControllerBehaviour (optional)
         public RunStateControllerBehaviour runState = default!;
 
         [Header("Follow")]
@@ -34,12 +34,12 @@ namespace Game.Presentation.Runtime.Camera
 
         private void Reset()
         {
-            cam = Camera.main;
+            cam = UnityEngine.Camera.main;
         }
 
         private void Awake()
         {
-            if (cam == null) cam = Camera.main;
+            if (cam == null) cam = UnityEngine.Camera.main;
             if (runner != null) _lastRunnerX = runner.position.x;
         }
 
@@ -53,7 +53,6 @@ namespace Game.Presentation.Runtime.Camera
 
             float impulseAdd = Mathf.Clamp(dx * 10f, -1f, 1f) * laneImpulseAmount;
             _laneImpulse += impulseAdd;
-
             _laneImpulse = Mathf.Lerp(_laneImpulse, 0f, 1f - Mathf.Exp(-laneImpulseDamping * Time.deltaTime));
 
             float sway = runner.position.x * laneSwayFactor;
@@ -65,9 +64,15 @@ namespace Game.Presentation.Runtime.Camera
             Quaternion desiredRot = Quaternion.LookRotation(lookTarget - transform.position, Vector3.up);
             transform.rotation = Quaternion.Slerp(transform.rotation, desiredRot, 1f - Mathf.Exp(-rotationSmooth * Time.deltaTime));
 
-            float targetFov = baseFov;
-            if (zoomies != null && zoomies.IsActive) targetFov = zoomiesFov;
+            bool zoomiesActive = false;
+            if (zoomiesBehaviour != null)
+            {
+                var prop = zoomiesBehaviour.GetType().GetProperty("IsActive");
+                if (prop != null && prop.PropertyType == typeof(bool))
+                    zoomiesActive = (bool)prop.GetValue(zoomiesBehaviour);
+            }
 
+            float targetFov = zoomiesActive ? zoomiesFov : baseFov;
             cam.fieldOfView = Mathf.Lerp(cam.fieldOfView, targetFov, 1f - Mathf.Exp(-fovSmooth * Time.deltaTime));
         }
     }
