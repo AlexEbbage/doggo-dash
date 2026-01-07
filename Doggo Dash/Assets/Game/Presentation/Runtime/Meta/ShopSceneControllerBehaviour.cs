@@ -45,7 +45,7 @@ namespace Game.Presentation.Runtime.Meta
             if (selectedOutfitText != null) selectedOutfitText.text = $"Outfit: {d.selectedOutfitId}";
         }
 
-        private ShopItemSO? CurrentItem
+        private ShopItemSO CurrentItem
         {
             get
             {

@@ -41,6 +41,6 @@ namespace Game.Presentation.Runtime.Meta
 
         public void Play() => SceneManager.LoadScene(gameSceneName);
         public void OpenShop() => SceneManager.LoadScene(shopSceneName);
-        public void Quit() => Application.Quit();
+        public void Quit() => UnityEngine.Application.Quit();
     }
 }

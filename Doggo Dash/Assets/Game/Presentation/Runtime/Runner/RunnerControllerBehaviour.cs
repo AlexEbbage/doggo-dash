@@ -39,6 +39,11 @@ namespace Game.Presentation.Runtime.Runner
         public void SetExternalForwardSpeed(float speed) => _externalForwardSpeed = Mathf.Max(0f, speed);
         public void ClearExternalForwardSpeed() => _externalForwardSpeed = null;
 
+        public bool IsJumping => _useCase != null && _useCase.State.IsJumping;
+        public bool IsSliding => _useCase != null && _useCase.State.IsSliding;
+        public Lane CurrentLane => _useCase != null ? _useCase.State.CurrentLane : Lane.Middle;
+        public bool IsChangingLane => _useCase != null && _useCase.State.IsChangingLane;
+
         private void Awake()
         {
             _cc = GetComponent<CharacterController>();

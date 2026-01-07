@@ -23,7 +23,7 @@ namespace Game.Presentation.Runtime.World.Curvature
 #if UNITY_EDITOR
         private void Update()
         {
-            if (!Application.isPlaying && applyInEditMode)
+            if (!UnityEngine.Application.isPlaying && applyInEditMode)
                 Apply();
         }
 #endif

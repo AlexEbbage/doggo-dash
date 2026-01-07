@@ -9,7 +9,7 @@ namespace Game.Presentation.Runtime.Input
         [Min(10f)] public float minSwipeDistancePixels = 60f;
         public bool ignoreTaps = true;
 
-        public System.Action<RunnerCommandType>? OnCommand;
+        public System.Action<RunnerCommandType> OnCommand;
 
         private bool _tracking;
         private Vector2 _startPos;
