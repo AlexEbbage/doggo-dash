@@ -42,5 +42,11 @@ namespace Game.Presentation.Runtime.Run
             var scene = SceneManager.GetActiveScene();
             SceneManager.LoadScene(scene.buildIndex);
         }
+
+        [ContextMenu("DEV/Force Fail")]
+        private void DevForceFail()
+        {
+            OnRunFailed(RunFailReason.ObstacleHit, ObstacleType.FullBlock);
+        }
     }
 }

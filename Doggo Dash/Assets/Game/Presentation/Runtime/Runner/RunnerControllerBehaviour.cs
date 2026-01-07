@@ -16,7 +16,7 @@ namespace Game.Presentation.Runtime.Runner
         public RunnerConfigSO config = null!;
 
         [Header("Refs")]
-        public SwipeInputBehaviour swipeInput = null!;
+        public MonoBehaviour inputBehaviour = null!;
         public UnityRunnerEventSink eventSink = null!;
 
         [Header("Motion")]
@@ -27,6 +27,7 @@ namespace Game.Presentation.Runtime.Runner
         private RunnerUseCase _useCase = null!;
         private float _defaultControllerHeight;
         private Vector3 _defaultControllerCenter;
+        private IRunnerCommandSource _input;
 
         private float _targetHeightMultiplier = 1f;
         private float _heightVel;
@@ -64,13 +65,21 @@ namespace Game.Presentation.Runtime.Runner
             var state = new RunnerState();
             _useCase = new RunnerUseCase(appConfig, state, eventSink);
 
-            swipeInput.OnCommand += OnCommand;
+            _input = inputBehaviour as IRunnerCommandSource;
+            if (_input == null)
+            {
+                Debug.LogError("[RunnerController] inputBehaviour must implement IRunnerCommandSource.");
+                enabled = false;
+                return;
+            }
+
+            _input.OnCommand += OnCommand;
         }
 
         private void OnDestroy()
         {
-            if (swipeInput != null)
-                swipeInput.OnCommand -= OnCommand;
+            if (_input != null)
+                _input.OnCommand -= OnCommand;
         }
 
         private void Update()
@@ -97,7 +106,7 @@ namespace Game.Presentation.Runtime.Runner
             if (visualRoot != null)
             {
                 Vector3 v = visualRoot.localPosition;
-                v.y = frame.VerticalOffset;
+                v.y = 0f; // frame.VerticalOffset;
                 visualRoot.localPosition = v;
             }
 

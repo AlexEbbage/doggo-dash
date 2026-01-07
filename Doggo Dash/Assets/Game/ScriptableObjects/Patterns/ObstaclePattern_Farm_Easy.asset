@@ -13,15 +13,23 @@ MonoBehaviour:
   m_Name: ObstaclePattern_Farm_Easy
   m_EditorClassIdentifier: 
   rows:
-  - zOffset: 0
-    lanes: 0
+  - zOffset: 30
+    lanes: -1
     obstacleId: BranchLow
     chance: 0.33
-  - zOffset: 0
-    lanes: 0
-    obstacleId: RockFull
+  - zOffset: 30
+    lanes: -1
+    obstacleId: FenceHigh
     chance: 0.44
-  - zOffset: 0
-    lanes: 0
+  - zOffset: 30
+    lanes: 1
+    obstacleId: RockFull
+    chance: 0.28
+  - zOffset: 30
+    lanes: 2
+    obstacleId: RockFull
+    chance: 0.28
+  - zOffset: 30
+    lanes: 4
     obstacleId: RockFull
     chance: 0.28

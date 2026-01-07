@@ -3,13 +3,13 @@ using Game.Domain.ValueObjects;
 
 namespace Game.Presentation.Runtime.Input
 {
-    public sealed class SwipeInputBehaviour : MonoBehaviour
+    public sealed class SwipeInputBehaviour : MonoBehaviour, IRunnerCommandSource
     {
         [Header("Swipe")]
         [Min(10f)] public float minSwipeDistancePixels = 60f;
         public bool ignoreTaps = true;
 
-        public System.Action<RunnerCommandType> OnCommand;
+        public event System.Action<RunnerCommandType> OnCommand;
 
         private bool _tracking;
         private Vector2 _startPos;
