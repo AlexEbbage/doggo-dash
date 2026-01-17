@@ -1,4 +1,5 @@
 using Game.Application.Ports;
+using Game.Application.Services;
 using Game.Infrastructure.Persistence;
 
 namespace Game.Presentation.Runtime.Meta
@@ -12,12 +13,22 @@ namespace Game.Presentation.Runtime.Meta
         {
             _save = save;
             _data = _save.Load();
+            ProgressClampUtility.ClampProgress(_data);
         }
 
         public PlayerProgressData Data => _data;
 
-        public void Reload() => _data = _save.Load();
-        public void Save() => _save.Save(_data);
+        public void Reload()
+        {
+            _data = _save.Load();
+            ProgressClampUtility.ClampProgress(_data);
+        }
+
+        public void Save()
+        {
+            ProgressClampUtility.ClampProgress(_data);
+            _save.Save(_data);
+        }
 
         public bool SpendKibble(int amount)
         {
