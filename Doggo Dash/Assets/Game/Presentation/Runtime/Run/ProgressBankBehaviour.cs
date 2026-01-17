@@ -18,6 +18,14 @@ namespace Game.Presentation.Runtime.Run
         public TMP_Text bestScoreText;
         public TMP_Text bestDistanceText;
 
+        [Header("XP")]
+        [Min(0f)]
+        public float xpPerMeter = 1f;
+        [Min(0)]
+        public int xpPerKibble = 1;
+        [Min(1)]
+        public int fallbackXpToNext = 100;
+
         private IProgressSaveGateway _save = default!;
         private PlayerProgressData _data = default!;
         private bool _bankedThisFail;
@@ -59,6 +67,8 @@ namespace Game.Presentation.Runtime.Run
                 if (dist > _data.bestDistanceMeters) _data.bestDistanceMeters = dist;
             }
 
+            ApplyXpGain();
+
             _save.Save(_data);
             RefreshUI();
         }
@@ -82,6 +92,33 @@ namespace Game.Presentation.Runtime.Run
             if (totalGemsText != null) totalGemsText.text = $"{_data.totalGems}";
             if (bestScoreText != null) bestScoreText.text = $"{_data.bestScore}";
             if (bestDistanceText != null) bestDistanceText.text = $"{Mathf.FloorToInt(_data.bestDistanceMeters)}m";
+        }
+
+        private void ApplyXpGain()
+        {
+            int xpGain = 0;
+            if (runRewards != null)
+            {
+                xpGain += runRewards.Kibble * xpPerKibble;
+            }
+
+            if (scoreDistance != null)
+            {
+                xpGain += Mathf.FloorToInt(scoreDistance.DistanceMeters * xpPerMeter);
+            }
+
+            if (xpGain <= 0) return;
+
+            if (_data.level <= 0) _data.level = 1;
+            if (_data.xp < 0) _data.xp = 0;
+            if (_data.xpToNext <= 0) _data.xpToNext = Mathf.Max(1, fallbackXpToNext);
+
+            _data.xp += xpGain;
+            while (_data.xp >= _data.xpToNext)
+            {
+                _data.xp -= _data.xpToNext;
+                _data.level += 1;
+            }
         }
     }
 }

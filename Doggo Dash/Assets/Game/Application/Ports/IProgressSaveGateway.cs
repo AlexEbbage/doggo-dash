@@ -15,6 +15,10 @@ namespace Game.Application.Ports
         public int bestScore;
         public float bestDistanceMeters;
 
+        public int xp;
+        public int level = 1;
+        public int xpToNext = 100;
+
         public string selectedPetId = "dog_default";
         public string selectedOutfitId = "outfit_default";
     }
