@@ -8,7 +8,7 @@ namespace Game.Presentation.Runtime.Meta
     public sealed class ShopSceneControllerBehaviour : MonoBehaviour
     {
         [Header("Scenes")]
-        public string menuSceneName = "Menu";
+        public string menuSceneName = "Hub";
 
         [Header("Catalog")]
         public ShopCatalogSO catalog = default!;

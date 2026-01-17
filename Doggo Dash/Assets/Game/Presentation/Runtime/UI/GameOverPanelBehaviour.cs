@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using TMPro;
 using Game.Presentation.Runtime.Run;
 
@@ -14,6 +15,9 @@ namespace Game.Presentation.Runtime.UI
         [Header("UI")]
         public GameObject panelRoot = default!;
         public TMP_Text summaryText = default!;
+
+        [Header("Scenes")]
+        public string hubSceneName = "Hub";
 
         private bool _shown;
 
@@ -55,6 +59,17 @@ namespace Game.Presentation.Runtime.UI
         {
             if (runState != null)
                 runState.RestartScene();
+        }
+
+        public void BackToHub()
+        {
+            if (string.IsNullOrWhiteSpace(hubSceneName))
+            {
+                Debug.LogWarning("Hub scene name is not set.", this);
+                return;
+            }
+
+            SceneManager.LoadScene(hubSceneName);
         }
     }
 }
