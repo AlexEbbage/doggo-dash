@@ -12,13 +12,76 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 06a38681afe40114fbd99a6989573e86, type: 3}
   m_Name: FarmDecorationConfig_MVP
   m_EditorClassIdentifier: 
-  edgeLeftPrefabs: []
-  edgeRightPrefabs: []
-  centerPrefabs: []
-  raisedLeftPrefabs: []
-  raisedRightPrefabs: []
-  backgroundNearPrefabs: []
-  backgroundFarPrefabs: []
-  globalSpawnMultiplier: 1
-  positionJitterXZ: 0.3
-  minSeparation: 0.6
+  edgeLeftPrefabs:
+  - prefab: {fileID: 5028619545003702080, guid: 0d0b653cf1f1bc247a79348e328d4c1c,
+      type: 3}
+    weight: 1
+  - prefab: {fileID: 6390910283253651830, guid: 7c8449f4a22bf5745b404e29b22391e8,
+      type: 3}
+    weight: 0.9
+  - prefab: {fileID: 7755186631106604756, guid: 0d94a85bc6edeb2448c9e7bd28bae53e,
+      type: 3}
+    weight: 0.7
+  edgeRightPrefabs:
+  - prefab: {fileID: 5028619545003702080, guid: 0d0b653cf1f1bc247a79348e328d4c1c,
+      type: 3}
+    weight: 1
+  - prefab: {fileID: 6390910283253651830, guid: 7c8449f4a22bf5745b404e29b22391e8,
+      type: 3}
+    weight: 0.9
+  - prefab: {fileID: 7755186631106604756, guid: 0d94a85bc6edeb2448c9e7bd28bae53e,
+      type: 3}
+    weight: 0.7
+  centerPrefabs:
+  - prefab: {fileID: 6390910283253651830, guid: 7c8449f4a22bf5745b404e29b22391e8,
+      type: 3}
+    weight: 1
+  - prefab: {fileID: 7755186631106604756, guid: 0d94a85bc6edeb2448c9e7bd28bae53e,
+      type: 3}
+    weight: 0.8
+  - prefab: {fileID: 5028619545003702080, guid: 0d0b653cf1f1bc247a79348e328d4c1c,
+      type: 3}
+    weight: 0.6
+  raisedLeftPrefabs:
+  - prefab: {fileID: 5028619545003702080, guid: 0d0b653cf1f1bc247a79348e328d4c1c,
+      type: 3}
+    weight: 0.9
+  - prefab: {fileID: 6390910283253651830, guid: 7c8449f4a22bf5745b404e29b22391e8,
+      type: 3}
+    weight: 0.8
+  - prefab: {fileID: 7755186631106604756, guid: 0d94a85bc6edeb2448c9e7bd28bae53e,
+      type: 3}
+    weight: 0.6
+  raisedRightPrefabs:
+  - prefab: {fileID: 5028619545003702080, guid: 0d0b653cf1f1bc247a79348e328d4c1c,
+      type: 3}
+    weight: 0.9
+  - prefab: {fileID: 6390910283253651830, guid: 7c8449f4a22bf5745b404e29b22391e8,
+      type: 3}
+    weight: 0.8
+  - prefab: {fileID: 7755186631106604756, guid: 0d94a85bc6edeb2448c9e7bd28bae53e,
+      type: 3}
+    weight: 0.6
+  backgroundNearPrefabs:
+  - prefab: {fileID: 6390910283253651830, guid: 7c8449f4a22bf5745b404e29b22391e8,
+      type: 3}
+    weight: 0.7
+  - prefab: {fileID: 5028619545003702080, guid: 0d0b653cf1f1bc247a79348e328d4c1c,
+      type: 3}
+    weight: 0.6
+  - prefab: {fileID: 7755186631106604756, guid: 0d94a85bc6edeb2448c9e7bd28bae53e,
+      type: 3}
+    weight: 0.5
+  backgroundFarPrefabs:
+  - prefab: {fileID: 6390910283253651830, guid: 7c8449f4a22bf5745b404e29b22391e8,
+      type: 3}
+    weight: 0.6
+  - prefab: {fileID: 5028619545003702080, guid: 0d0b653cf1f1bc247a79348e328d4c1c,
+      type: 3}
+    weight: 0.5
+  - prefab: {fileID: 7755186631106604756, guid: 0d94a85bc6edeb2448c9e7bd28bae53e,
+      type: 3}
+    weight: 0.4
+  globalSpawnMultiplier: 0.65
+  positionJitterXZ: 0.15
+  minSeparation: 1
