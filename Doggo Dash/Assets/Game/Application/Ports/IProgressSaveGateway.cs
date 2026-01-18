@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace Game.Application.Ports
 {
     public interface IProgressSaveGateway
@@ -27,5 +29,8 @@ namespace Game.Application.Ports
 
         public string selectedPetId = "dog_default";
         public string selectedOutfitId = "outfit_default";
+
+        public List<string> ownedPets = new List<string>();
+        public List<string> ownedOutfits = new List<string>();
     }
 }

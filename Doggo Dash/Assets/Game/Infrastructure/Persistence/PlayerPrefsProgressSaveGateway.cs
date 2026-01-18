@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using Game.Application.Ports;
 using Game.Application.Services;
@@ -76,7 +77,22 @@ namespace Game.Infrastructure.Persistence
             if (data.lastEnergyTimestampUtc <= 0) data.lastEnergyTimestampUtc = now;
             if (data.lastXpTimestampUtc <= 0) data.lastXpTimestampUtc = now;
 
+            if (string.IsNullOrWhiteSpace(data.selectedPetId)) data.selectedPetId = "dog_default";
+            if (string.IsNullOrWhiteSpace(data.selectedOutfitId)) data.selectedOutfitId = "outfit_default";
+
+            if (data.ownedPets == null) data.ownedPets = new List<string>();
+            if (data.ownedOutfits == null) data.ownedOutfits = new List<string>();
+            EnsureOwned(data.ownedPets, data.selectedPetId);
+            EnsureOwned(data.ownedOutfits, data.selectedOutfitId);
+
             ProgressClampUtility.ClampProgress(data);
+        }
+
+        private static void EnsureOwned(List<string> ownedList, string itemId)
+        {
+            if (ownedList == null) return;
+            if (string.IsNullOrWhiteSpace(itemId)) return;
+            if (!ownedList.Contains(itemId)) ownedList.Add(itemId);
         }
     }
 }

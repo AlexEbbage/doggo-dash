@@ -21,6 +21,7 @@ namespace Game.Presentation.Runtime.Meta
         public TMP_Text selectedOutfitText;
 
         public TMP_Text feedbackText;
+        public TMP_Text buyButtonText;
 
         private MetaProgressService _progress = default!;
         private int _index;
@@ -80,10 +81,13 @@ namespace Game.Presentation.Runtime.Meta
                 return;
             }
 
+            bool isOwned = _progress.IsOwned(item.type, item.itemId);
+            if (buyButtonText != null) buyButtonText.text = isOwned ? "Owned" : "Buy";
+
             feedbackText.text =
                 $"{item.displayName}\n" +
                 $"{item.type}\n" +
-                $"Cost: {item.price} {item.currency}";
+                $"{(isOwned ? "Owned" : $"Cost: {item.price} {item.currency}")}";
         }
 
         public void BuyOrSelectCurrent()
@@ -95,8 +99,13 @@ namespace Game.Presentation.Runtime.Meta
                 return;
             }
 
-            bool paid = item.price <= 0 || TrySpend(item.currency, item.price);
-            if (!paid) return;
+            bool isOwned = _progress.IsOwned(item.type, item.itemId);
+            if (!isOwned)
+            {
+                bool paid = item.price <= 0 || TrySpend(item.currency, item.price);
+                if (!paid) return;
+                _progress.GrantOwnership(item.type, item.itemId);
+            }
 
             if (item.type == ShopItemType.Pet)
             {
@@ -110,6 +119,7 @@ namespace Game.Presentation.Runtime.Meta
             }
 
             RefreshAll();
+            ShowCurrentItem();
         }
 
         private bool TrySpend(ShopCurrency currency, int price)
