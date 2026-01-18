@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace Game.Application.Ports
 {
     public interface IProgressSaveGateway
@@ -25,7 +27,21 @@ namespace Game.Application.Ports
         public long lastEnergyTimestampUtc;
         public long lastXpTimestampUtc;
 
+        public long lastDailyChallengesResetUtc;
+        public long lastWeeklyChallengesResetUtc;
+
+        public List<ChallengeProgressEntry> challengeProgress = new();
+
         public string selectedPetId = "dog_default";
         public string selectedOutfitId = "outfit_default";
+    }
+
+    [System.Serializable]
+    public sealed class ChallengeProgressEntry
+    {
+        public string id = string.Empty;
+        public float progress;
+        public bool completed;
+        public long completedUtcSeconds;
     }
 }
