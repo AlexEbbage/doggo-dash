@@ -22,22 +22,45 @@ namespace Game.Application.Services
         {
             bool changed = false;
             DateTimeOffset today = utcNow.Date;
-            long todaySeconds = today.ToUnixTimeSeconds();
+            long dailyReset = today.ToUnixTimeSeconds();
+            long weeklyReset = GetWeekStartUtc(today).ToUnixTimeSeconds();
 
-            if (_data.lastDailyChallengesResetUtc != todaySeconds)
+            foreach (ChallengeDefinition definition in _definitions)
             {
-                ResetChallenges(ChallengePeriod.Daily);
-                _data.lastDailyChallengesResetUtc = todaySeconds;
-                changed = true;
-            }
+                if (definition == null || string.IsNullOrWhiteSpace(definition.id))
+                {
+                    continue;
+                }
 
-            DateTimeOffset weekStart = GetWeekStartUtc(today);
-            long weekSeconds = weekStart.ToUnixTimeSeconds();
-            if (_data.lastWeeklyChallengesResetUtc != weekSeconds)
-            {
-                ResetChallenges(ChallengePeriod.Weekly);
-                _data.lastWeeklyChallengesResetUtc = weekSeconds;
-                changed = true;
+                if (!TryGetEntry(definition.id, out ChallengeProgressEntry entry))
+                {
+                    entry = CreateEntry(definition);
+                    _data.challengeProgress.Add(entry);
+                    changed = true;
+                }
+
+                long resetAnchor = definition.period == ChallengePeriod.Weekly ? weeklyReset : dailyReset;
+                if (entry.lastResetUtcSeconds == 0)
+                {
+                    changed |= MigrateLegacyEntry(entry, definition, resetAnchor, utcNow);
+                }
+                else if (entry.lastResetUtcSeconds != resetAnchor)
+                {
+                    ResetEntry(entry, resetAnchor);
+                    changed = true;
+                }
+
+                changed |= SyncEntryWithDefinition(entry, definition);
+
+                if (definition.target > 0f && entry.current >= definition.target && !entry.completed)
+                {
+                    entry.completed = true;
+                    if (entry.completedUtcSeconds <= 0)
+                    {
+                        entry.completedUtcSeconds = utcNow.ToUnixTimeSeconds();
+                    }
+                    changed = true;
+                }
             }
 
             return changed;
@@ -53,9 +76,15 @@ namespace Game.Application.Services
                     continue;
                 }
 
-                if (!TryGetEntry(definition.id, out _))
+                if (!TryGetEntry(definition.id, out ChallengeProgressEntry entry))
                 {
-                    _data.challengeProgress.Add(new ChallengeProgressEntry { id = definition.id });
+                    _data.challengeProgress.Add(CreateEntry(definition));
+                    changed = true;
+                    continue;
+                }
+
+                if (SyncEntryWithDefinition(entry, definition))
+                {
                     changed = true;
                 }
             }
@@ -75,7 +104,7 @@ namespace Game.Application.Services
 
                 if (!TryGetEntry(definition.id, out ChallengeProgressEntry entry))
                 {
-                    entry = new ChallengeProgressEntry { id = definition.id };
+                    entry = CreateEntry(definition);
                     _data.challengeProgress.Add(entry);
                     changed = true;
                 }
@@ -91,14 +120,21 @@ namespace Game.Application.Services
                     continue;
                 }
 
-                entry.progress += delta;
+                float current = entry.current;
+                if (current <= 0f && entry.progress > 0f)
+                {
+                    current = entry.progress;
+                }
+
+                current += delta;
+                entry.current = current;
+                entry.progress = entry.current;
                 changed = true;
 
-                if (definition.target > 0f && entry.progress >= definition.target)
+                if (definition.target > 0f && entry.current >= definition.target)
                 {
                     entry.completed = true;
                     entry.completedUtcSeconds = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-                    GrantRewards(definition);
                     changed = true;
                 }
             }
@@ -138,41 +174,26 @@ namespace Game.Application.Services
             return false;
         }
 
-        private void ResetChallenges(ChallengePeriod period)
+        public bool TryClaimReward(ChallengeDefinition definition)
         {
-            if (_data.challengeProgress == null)
+            if (definition == null || string.IsNullOrWhiteSpace(definition.id))
             {
-                return;
+                return false;
             }
 
-            HashSet<string> ids = new HashSet<string>();
-            foreach (ChallengeDefinition definition in _definitions)
+            if (!TryGetEntry(definition.id, out ChallengeProgressEntry entry))
             {
-                if (definition == null || definition.period != period)
-                {
-                    continue;
-                }
-
-                if (!string.IsNullOrWhiteSpace(definition.id))
-                {
-                    ids.Add(definition.id);
-                }
+                return false;
             }
 
-            foreach (ChallengeProgressEntry entry in _data.challengeProgress)
+            if (!entry.completed || entry.rewardClaimed)
             {
-                if (entry == null)
-                {
-                    continue;
-                }
-
-                if (ids.Contains(entry.id))
-                {
-                    entry.progress = 0f;
-                    entry.completed = false;
-                    entry.completedUtcSeconds = 0;
-                }
+                return false;
             }
+
+            entry.rewardClaimed = true;
+            GrantRewards(definition);
+            return true;
         }
 
         private static float GetDelta(ChallengeMetric metric, float distanceMeters, int treatPickups, int gemPickups, int badFoodHits)
@@ -209,6 +230,108 @@ namespace Game.Application.Services
         {
             int diff = (7 + (int)utcDate.DayOfWeek - (int)DayOfWeek.Monday) % 7;
             return utcDate.AddDays(-diff);
+        }
+
+        private static ChallengeProgressEntry CreateEntry(ChallengeDefinition definition)
+        {
+            var entry = new ChallengeProgressEntry { id = definition.id };
+            SyncEntryWithDefinition(entry, definition);
+            return entry;
+        }
+
+        private static bool SyncEntryWithDefinition(ChallengeProgressEntry entry, ChallengeDefinition definition)
+        {
+            if (entry == null || definition == null)
+            {
+                return false;
+            }
+
+            bool changed = false;
+            if (entry.type != definition.metric)
+            {
+                entry.type = definition.metric;
+                changed = true;
+            }
+
+            if (Math.Abs(entry.target - definition.target) > 0.001f)
+            {
+                entry.target = definition.target;
+                changed = true;
+            }
+
+            if (entry.current <= 0f && entry.progress > 0f)
+            {
+                entry.current = entry.progress;
+                changed = true;
+            }
+
+            if (Math.Abs(entry.progress - entry.current) > 0.001f)
+            {
+                entry.progress = entry.current;
+                changed = true;
+            }
+
+            return changed;
+        }
+
+        private static void ResetEntry(ChallengeProgressEntry entry, long resetAnchorSeconds)
+        {
+            if (entry == null)
+            {
+                return;
+            }
+
+            entry.current = 0f;
+            entry.progress = 0f;
+            entry.completed = false;
+            entry.rewardClaimed = false;
+            entry.completedUtcSeconds = 0;
+            entry.lastResetUtcSeconds = resetAnchorSeconds;
+        }
+
+        private static bool MigrateLegacyEntry(ChallengeProgressEntry entry, ChallengeDefinition definition, long resetAnchor, DateTimeOffset utcNow)
+        {
+            if (entry == null || definition == null)
+            {
+                return false;
+            }
+
+            bool changed = false;
+            if (entry.current <= 0f && entry.progress > 0f)
+            {
+                entry.current = entry.progress;
+                changed = true;
+            }
+
+            if (entry.current < 0f)
+            {
+                entry.current = 0f;
+                changed = true;
+            }
+
+            if (definition.target > 0f && entry.current >= definition.target && !entry.completed)
+            {
+                entry.completed = true;
+                if (entry.completedUtcSeconds <= 0)
+                {
+                    entry.completedUtcSeconds = utcNow.ToUnixTimeSeconds();
+                }
+                changed = true;
+            }
+
+            if (entry.completed && !entry.rewardClaimed)
+            {
+                entry.rewardClaimed = true;
+                changed = true;
+            }
+
+            if (entry.lastResetUtcSeconds != resetAnchor)
+            {
+                entry.lastResetUtcSeconds = resetAnchor;
+                changed = true;
+            }
+
+            return changed;
         }
     }
 }

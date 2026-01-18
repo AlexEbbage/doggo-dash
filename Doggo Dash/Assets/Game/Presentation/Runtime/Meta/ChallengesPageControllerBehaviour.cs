@@ -4,6 +4,7 @@ using Game.Application.Services;
 using Game.Infrastructure.Persistence;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Game.Presentation.Runtime.Meta
 {
@@ -80,6 +81,11 @@ namespace Game.Presentation.Runtime.Meta
                 _service.TryGetProgress(definition, out ChallengeProgressEntry entry);
                 slot.SetActive(true);
                 slot.Apply(definition, entry);
+                bool isComplete = entry != null && entry.completed;
+                bool isClaimed = entry != null && entry.rewardClaimed;
+                slot.SetClaimState(isComplete, isClaimed);
+                ChallengeDefinition capturedDefinition = definition;
+                slot.BindClaim(() => HandleClaim(capturedDefinition));
             }
         }
 
@@ -100,6 +106,21 @@ namespace Game.Presentation.Runtime.Meta
             foreach (ChallengeSlot slot in slots)
             {
                 slot?.SetActive(false);
+                slot?.BindClaim(null);
+            }
+        }
+
+        private void HandleClaim(ChallengeDefinition definition)
+        {
+            if (_service == null || definition == null)
+            {
+                return;
+            }
+
+            if (_service.TryClaimReward(definition))
+            {
+                _save.Save(_data);
+                Refresh();
             }
         }
 
@@ -111,6 +132,8 @@ namespace Game.Presentation.Runtime.Meta
             public TMP_Text descriptionText;
             public TMP_Text progressText;
             public TMP_Text rewardText;
+            public Button claimButton;
+            public TMP_Text claimButtonText;
 
             public void SetActive(bool active)
             {
@@ -143,9 +166,44 @@ namespace Game.Presentation.Runtime.Meta
                 }
             }
 
+            public void SetClaimState(bool isComplete, bool isClaimed)
+            {
+                if (claimButton == null)
+                {
+                    return;
+                }
+
+                claimButton.interactable = isComplete && !isClaimed;
+                if (claimButtonText != null)
+                {
+                    if (!isComplete)
+                    {
+                        claimButtonText.text = "In Progress";
+                    }
+                    else
+                    {
+                        claimButtonText.text = isClaimed ? "Claimed" : "Claim";
+                    }
+                }
+            }
+
+            public void BindClaim(System.Action onClaim)
+            {
+                if (claimButton == null)
+                {
+                    return;
+                }
+
+                claimButton.onClick.RemoveAllListeners();
+                if (onClaim != null)
+                {
+                    claimButton.onClick.AddListener(() => onClaim());
+                }
+            }
+
             private static string BuildProgressText(ChallengeDefinition definition, ChallengeProgressEntry entry)
             {
-                float progress = entry != null ? entry.progress : 0f;
+                float progress = entry != null ? entry.current : 0f;
                 float target = Mathf.Max(0f, definition.target);
                 bool completed = entry != null && entry.completed;
 

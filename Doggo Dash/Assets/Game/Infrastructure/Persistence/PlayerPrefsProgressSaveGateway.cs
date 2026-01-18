@@ -105,6 +105,8 @@ namespace Game.Infrastructure.Persistence
         {
             int diff = (7 + (int)utcDate.DayOfWeek - (int)DayOfWeek.Monday) % 7;
             return utcDate.AddDays(-diff);
+        }
+
         private static void EnsureOwned(List<string> ownedList, string itemId)
         {
             if (ownedList == null) return;

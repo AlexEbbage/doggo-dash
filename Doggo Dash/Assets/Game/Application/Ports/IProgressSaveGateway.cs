@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Game.Application.Services;
 
 namespace Game.Application.Ports
 {
@@ -46,8 +47,13 @@ namespace Game.Application.Ports
     public sealed class ChallengeProgressEntry
     {
         public string id = string.Empty;
+        public ChallengeMetric type;
+        public float target;
+        public float current;
+        public long lastResetUtcSeconds;
         public float progress;
         public bool completed;
+        public bool rewardClaimed;
         public long completedUtcSeconds;
     }
 }
