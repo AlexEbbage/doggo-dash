@@ -11,6 +11,7 @@ namespace Game.Presentation.Runtime.Meta
         [SerializeField] private TMP_Text selectedPetText;
         [SerializeField] private TMP_Text selectedOutfitText;
         [SerializeField] private TMP_Text ownedSummaryText;
+        [SerializeField] private TMP_Text challengeSummaryText;
 
         private MetaProgressService _progress = default!;
 
@@ -48,6 +49,11 @@ namespace Game.Presentation.Runtime.Meta
             if (ownedSummaryText != null)
             {
                 ownedSummaryText.text = MetaProgressTextFormatter.BuildOwnedSummary(data.ownedPets, data.ownedOutfits);
+            }
+
+            if (challengeSummaryText != null)
+            {
+                challengeSummaryText.text = MetaProgressTextFormatter.BuildChallengeSummary(data);
             }
         }
     }

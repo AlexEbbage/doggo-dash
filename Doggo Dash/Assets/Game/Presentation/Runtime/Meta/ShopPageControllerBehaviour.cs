@@ -15,6 +15,9 @@ namespace Game.Presentation.Runtime.Meta
         [SerializeField] private TMP_Text totalKibbleText;
         [SerializeField] private TMP_Text totalGemsText;
 
+        [Header("Challenges")]
+        [SerializeField] private TMP_Text challengeSummaryText;
+
         private MetaProgressService _progress = default!;
 
         private void Awake()
@@ -56,6 +59,11 @@ namespace Game.Presentation.Runtime.Meta
             if (totalGemsText != null)
             {
                 totalGemsText.text = $"{data.totalGems}";
+            }
+
+            if (challengeSummaryText != null)
+            {
+                challengeSummaryText.text = MetaProgressTextFormatter.BuildChallengeSummary(data);
             }
         }
     }
