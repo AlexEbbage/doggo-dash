@@ -82,7 +82,7 @@ namespace Game.Presentation.Runtime.Meta
                     continue;
                 }
 
-                _service.TryGetProgress(definition, out ChallengeProgressEntry entry);
+                _service.TryGetProgress(definition, out ChallengeProgress entry);
                 slot.SetActive(true);
                 slot.Apply(definition, entry);
                 bool isComplete = entry != null && entry.completed;
@@ -144,7 +144,7 @@ namespace Game.Presentation.Runtime.Meta
             if (_data.challengeProgress != null)
             {
                 total = _data.challengeProgress.Count;
-                foreach (ChallengeProgressEntry entry in _data.challengeProgress)
+                foreach (ChallengeProgress entry in _data.challengeProgress)
                 {
                     if (entry == null)
                     {
@@ -188,7 +188,7 @@ namespace Game.Presentation.Runtime.Meta
                 }
             }
 
-            public void Apply(ChallengeDefinition definition, ChallengeProgressEntry entry)
+            public void Apply(ChallengeDefinition definition, ChallengeProgress entry)
             {
                 if (titleText != null)
                 {
@@ -246,7 +246,7 @@ namespace Game.Presentation.Runtime.Meta
                 }
             }
 
-            private static string BuildProgressText(ChallengeDefinition definition, ChallengeProgressEntry entry)
+            private static string BuildProgressText(ChallengeDefinition definition, ChallengeProgress entry)
             {
                 float progress = entry != null ? entry.current : 0f;
                 float target = Mathf.Max(0f, definition.target);

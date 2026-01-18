@@ -13,7 +13,7 @@ namespace Game.Application.Services
         {
             _data = data;
             _definitions = definitions == null ? new List<ChallengeDefinition>() : new List<ChallengeDefinition>(definitions);
-            _data.challengeProgress ??= new List<ChallengeProgressEntry>();
+            _data.challengeProgress ??= new List<ChallengeProgress>();
         }
 
         public IReadOnlyList<ChallengeDefinition> Definitions => _definitions;
@@ -32,7 +32,7 @@ namespace Game.Application.Services
                     continue;
                 }
 
-                if (!TryGetEntry(definition.id, out ChallengeProgressEntry entry))
+                if (!TryGetEntry(definition.id, out ChallengeProgress entry))
                 {
                     entry = CreateEntry(definition);
                     _data.challengeProgress.Add(entry);
@@ -40,11 +40,11 @@ namespace Game.Application.Services
                 }
 
                 long resetAnchor = definition.period == ChallengePeriod.Weekly ? weeklyReset : dailyReset;
-                if (entry.lastResetUtcSeconds == 0)
+                if (entry.lastReset == 0)
                 {
                     changed |= MigrateLegacyEntry(entry, definition, resetAnchor, utcNow);
                 }
-                else if (entry.lastResetUtcSeconds != resetAnchor)
+                else if (entry.lastReset != resetAnchor)
                 {
                     ResetEntry(entry, resetAnchor);
                     changed = true;
@@ -76,7 +76,7 @@ namespace Game.Application.Services
                     continue;
                 }
 
-                if (!TryGetEntry(definition.id, out ChallengeProgressEntry entry))
+                if (!TryGetEntry(definition.id, out ChallengeProgress entry))
                 {
                     _data.challengeProgress.Add(CreateEntry(definition));
                     changed = true;
@@ -102,7 +102,7 @@ namespace Game.Application.Services
                     continue;
                 }
 
-                if (!TryGetEntry(definition.id, out ChallengeProgressEntry entry))
+                if (!TryGetEntry(definition.id, out ChallengeProgress entry))
                 {
                     entry = CreateEntry(definition);
                     _data.challengeProgress.Add(entry);
@@ -142,7 +142,7 @@ namespace Game.Application.Services
             return changed;
         }
 
-        public bool TryGetProgress(ChallengeDefinition definition, out ChallengeProgressEntry entry)
+        public bool TryGetProgress(ChallengeDefinition definition, out ChallengeProgress entry)
         {
             entry = null;
             if (definition == null || string.IsNullOrWhiteSpace(definition.id))
@@ -153,7 +153,7 @@ namespace Game.Application.Services
             return TryGetEntry(definition.id, out entry);
         }
 
-        private bool TryGetEntry(string id, out ChallengeProgressEntry entry)
+        private bool TryGetEntry(string id, out ChallengeProgress entry)
         {
             entry = null;
             if (string.IsNullOrWhiteSpace(id) || _data.challengeProgress == null)
@@ -163,7 +163,7 @@ namespace Game.Application.Services
 
             for (int i = 0; i < _data.challengeProgress.Count; i++)
             {
-                ChallengeProgressEntry candidate = _data.challengeProgress[i];
+                ChallengeProgress candidate = _data.challengeProgress[i];
                 if (candidate != null && candidate.id == id)
                 {
                     entry = candidate;
@@ -181,7 +181,7 @@ namespace Game.Application.Services
                 return false;
             }
 
-            if (!TryGetEntry(definition.id, out ChallengeProgressEntry entry))
+            if (!TryGetEntry(definition.id, out ChallengeProgress entry))
             {
                 return false;
             }
@@ -232,14 +232,14 @@ namespace Game.Application.Services
             return utcDate.AddDays(-diff);
         }
 
-        private static ChallengeProgressEntry CreateEntry(ChallengeDefinition definition)
+        private static ChallengeProgress CreateEntry(ChallengeDefinition definition)
         {
-            var entry = new ChallengeProgressEntry { id = definition.id };
+            var entry = new ChallengeProgress { id = definition.id };
             SyncEntryWithDefinition(entry, definition);
             return entry;
         }
 
-        private static bool SyncEntryWithDefinition(ChallengeProgressEntry entry, ChallengeDefinition definition)
+        private static bool SyncEntryWithDefinition(ChallengeProgress entry, ChallengeDefinition definition)
         {
             if (entry == null || definition == null)
             {
@@ -274,7 +274,7 @@ namespace Game.Application.Services
             return changed;
         }
 
-        private static void ResetEntry(ChallengeProgressEntry entry, long resetAnchorSeconds)
+        private static void ResetEntry(ChallengeProgress entry, long resetAnchorSeconds)
         {
             if (entry == null)
             {
@@ -286,10 +286,10 @@ namespace Game.Application.Services
             entry.completed = false;
             entry.rewardClaimed = false;
             entry.completedUtcSeconds = 0;
-            entry.lastResetUtcSeconds = resetAnchorSeconds;
+            entry.lastReset = resetAnchorSeconds;
         }
 
-        private static bool MigrateLegacyEntry(ChallengeProgressEntry entry, ChallengeDefinition definition, long resetAnchor, DateTimeOffset utcNow)
+        private static bool MigrateLegacyEntry(ChallengeProgress entry, ChallengeDefinition definition, long resetAnchor, DateTimeOffset utcNow)
         {
             if (entry == null || definition == null)
             {
@@ -325,9 +325,9 @@ namespace Game.Application.Services
                 changed = true;
             }
 
-            if (entry.lastResetUtcSeconds != resetAnchor)
+            if (entry.lastReset != resetAnchor)
             {
-                entry.lastResetUtcSeconds = resetAnchor;
+                entry.lastReset = resetAnchor;
                 changed = true;
             }
 

@@ -185,7 +185,7 @@ namespace Game.Infrastructure.Persistence
 
             if (data.challengeProgress == null)
             {
-                data.challengeProgress = new System.Collections.Generic.List<ChallengeProgressEntry>();
+                data.challengeProgress = new System.Collections.Generic.List<ChallengeProgress>();
                 changed = true;
             }
             else if (SanitizeChallengeProgress(data.challengeProgress))
@@ -305,14 +305,14 @@ namespace Game.Infrastructure.Persistence
             return changed;
         }
 
-        private static bool SanitizeChallengeProgress(List<ChallengeProgressEntry> entries)
+        private static bool SanitizeChallengeProgress(List<ChallengeProgress> entries)
         {
             if (entries == null) return false;
             bool changed = false;
             var seen = new HashSet<string>();
             for (int i = entries.Count - 1; i >= 0; i--)
             {
-                ChallengeProgressEntry entry = entries[i];
+                ChallengeProgress entry = entries[i];
                 if (entry == null || string.IsNullOrWhiteSpace(entry.id) || !seen.Add(entry.id))
                 {
                     entries.RemoveAt(i);
