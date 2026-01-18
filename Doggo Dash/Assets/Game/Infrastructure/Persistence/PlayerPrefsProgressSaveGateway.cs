@@ -23,6 +23,7 @@ namespace Game.Infrastructure.Persistence
             {
                 PlayerProgressData data = JsonUtility.FromJson<PlayerProgressData>(json) ?? new PlayerProgressData();
                 ApplyDefaults(data);
+                ApplyMigrations(data);
                 return data;
             }
             catch
@@ -42,6 +43,7 @@ namespace Game.Infrastructure.Persistence
         {
             var data = new PlayerProgressData();
             ApplyDefaults(data);
+            ApplyMigrations(data);
             return data;
         }
 
@@ -90,8 +92,8 @@ namespace Game.Infrastructure.Persistence
             }
 
             data.challengeProgress ??= new System.Collections.Generic.List<ChallengeProgressEntry>();
-            if (string.IsNullOrWhiteSpace(data.selectedPetId)) data.selectedPetId = "dog_default";
-            if (string.IsNullOrWhiteSpace(data.selectedOutfitId)) data.selectedOutfitId = "outfit_default";
+            if (string.IsNullOrWhiteSpace(data.selectedPetId)) data.selectedPetId = PlayerProgressData.DefaultPetId;
+            if (string.IsNullOrWhiteSpace(data.selectedOutfitId)) data.selectedOutfitId = PlayerProgressData.DefaultOutfitId;
 
             if (data.ownedPets == null) data.ownedPets = new List<string>();
             if (data.ownedOutfits == null) data.ownedOutfits = new List<string>();
@@ -105,6 +107,29 @@ namespace Game.Infrastructure.Persistence
         {
             int diff = (7 + (int)utcDate.DayOfWeek - (int)DayOfWeek.Monday) % 7;
             return utcDate.AddDays(-diff);
+        }
+
+        private static void ApplyMigrations(PlayerProgressData data)
+        {
+            if (data == null) return;
+
+            data.ownedPets ??= new List<string>();
+            data.ownedOutfits ??= new List<string>();
+
+            if (string.IsNullOrWhiteSpace(data.selectedPetId))
+            {
+                data.selectedPetId = PlayerProgressData.DefaultPetId;
+            }
+
+            if (string.IsNullOrWhiteSpace(data.selectedOutfitId))
+            {
+                data.selectedOutfitId = PlayerProgressData.DefaultOutfitId;
+            }
+
+            EnsureOwned(data.ownedPets, data.selectedPetId);
+            EnsureOwned(data.ownedOutfits, data.selectedOutfitId);
+        }
+
         private static void EnsureOwned(List<string> ownedList, string itemId)
         {
             if (ownedList == null) return;
