@@ -16,6 +16,9 @@ namespace Game.Presentation.Runtime.Meta
         [Header("Slots (2-3 recommended)")]
         [SerializeField] private List<ChallengeSlot> slots = new();
 
+        [Header("Summary")]
+        [SerializeField] private TMP_Text completionSummaryText;
+
         private IProgressSaveGateway _save;
         private PlayerProgressData _data;
         private ChallengesService _service;
@@ -45,6 +48,7 @@ namespace Game.Presentation.Runtime.Meta
             if (_service == null)
             {
                 SetSlotsInactive();
+                UpdateSummary();
                 return;
             }
 
@@ -87,6 +91,8 @@ namespace Game.Presentation.Runtime.Meta
                 ChallengeDefinition capturedDefinition = definition;
                 slot.BindClaim(() => HandleClaim(capturedDefinition));
             }
+
+            UpdateSummary();
         }
 
         private void InitializeService()
@@ -122,6 +128,45 @@ namespace Game.Presentation.Runtime.Meta
                 _save.Save(_data);
                 Refresh();
             }
+        }
+
+        private void UpdateSummary()
+        {
+            if (completionSummaryText == null || _data == null)
+            {
+                return;
+            }
+
+            int total = 0;
+            int completed = 0;
+            int claimed = 0;
+
+            if (_data.challengeProgress != null)
+            {
+                total = _data.challengeProgress.Count;
+                foreach (ChallengeProgressEntry entry in _data.challengeProgress)
+                {
+                    if (entry == null)
+                    {
+                        continue;
+                    }
+
+                    if (entry.completed)
+                    {
+                        completed++;
+                    }
+
+                    if (entry.rewardClaimed)
+                    {
+                        claimed++;
+                    }
+                }
+            }
+
+            completionSummaryText.text = MetaProgressTextFormatter.BuildChallengeSummary(
+                completed,
+                total,
+                claimed);
         }
 
         [System.Serializable]
