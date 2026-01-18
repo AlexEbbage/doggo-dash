@@ -1,3 +1,5 @@
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -32,7 +34,24 @@ namespace Game.Presentation.Runtime.Meta
         [Header("Play")]
         public string gameSceneName = "Game";
 
+        [Header("Tab Visuals")]
+        public Vector3 selectedScale = new Vector3(1.05f, 1.05f, 1.05f);
+        public Vector3 unselectedScale = Vector3.one;
+        public Color selectedColor = Color.white;
+        public Color unselectedColor = new Color(1f, 1f, 1f, 0.6f);
+        public bool includeChildGraphics = true;
+        public bool swapSpriteOnSelect = false;
+        public Sprite selectedSprite = default!;
+        public Sprite unselectedSprite = default!;
+
+        [Header("Page Transitions (optional)")]
+        public bool enablePageTransitions = true;
+        public float pageFadeDuration = 0.2f;
+        public Vector2 pageSlideOffset = new Vector2(40f, 0f);
+
         private HubTab _current = HubTab.Shop;
+        private readonly Dictionary<GameObject, Vector2> _pageAnchors = new Dictionary<GameObject, Vector2>();
+        private readonly Dictionary<GameObject, Coroutine> _pageTransitions = new Dictionary<GameObject, Coroutine>();
 
         private void Awake()
         {
@@ -43,6 +62,12 @@ namespace Game.Presentation.Runtime.Meta
             if (tabChallenges) tabChallenges.onClick.AddListener(() => Show(HubTab.Challenges));
             if (tabProgression) tabProgression.onClick.AddListener(() => Show(HubTab.Progression));
 
+            CachePageTransform(pageShop);
+            CachePageTransform(pageCharacters);
+            CachePageTransform(pagePlay);
+            CachePageTransform(pageChallenges);
+            CachePageTransform(pageProgression);
+
             Show(_current);
         }
 
@@ -50,18 +75,218 @@ namespace Game.Presentation.Runtime.Meta
         {
             _current = tab;
 
-            if (pageShop) pageShop.SetActive(tab == HubTab.Shop);
-            if (pageCharacters) pageCharacters.SetActive(tab == HubTab.Characters);
-            if (pagePlay) pagePlay.SetActive(tab == HubTab.Play);
-            if (pageChallenges) pageChallenges.SetActive(tab == HubTab.Challenges);
-            if (pageProgression) pageProgression.SetActive(tab == HubTab.Progression);
+            SetPageActive(pageShop, tab == HubTab.Shop);
+            SetPageActive(pageCharacters, tab == HubTab.Characters);
+            SetPageActive(pagePlay, tab == HubTab.Play);
+            SetPageActive(pageChallenges, tab == HubTab.Challenges);
+            SetPageActive(pageProgression, tab == HubTab.Progression);
 
-            // Later: animate transitions + selected tab visuals here.
+            SetSelected(tabShop, tab == HubTab.Shop);
+            SetSelected(tabCharacters, tab == HubTab.Characters);
+            SetSelected(tabPlay, tab == HubTab.Play);
+            SetSelected(tabChallenges, tab == HubTab.Challenges);
+            SetSelected(tabProgression, tab == HubTab.Progression);
         }
 
         public void StartRun()
         {
             SceneManager.LoadScene(gameSceneName);
+        }
+
+        public void SetSelected(Button button, bool selected)
+        {
+            if (button == null)
+            {
+                return;
+            }
+
+            if (selected)
+            {
+                SetSelectedVisuals(button);
+            }
+            else
+            {
+                SetUnselectedVisuals(button);
+            }
+        }
+
+        public void SetSelectedVisuals(Button button)
+        {
+            if (button == null)
+            {
+                return;
+            }
+
+            button.transform.localScale = selectedScale;
+            ApplyVisualColors(button, selectedColor);
+            ApplySpriteSwap(button, selectedSprite);
+        }
+
+        public void SetUnselectedVisuals(Button button)
+        {
+            if (button == null)
+            {
+                return;
+            }
+
+            button.transform.localScale = unselectedScale;
+            ApplyVisualColors(button, unselectedColor);
+            ApplySpriteSwap(button, unselectedSprite);
+        }
+
+        private void ApplyVisualColors(Button button, Color color)
+        {
+            if (includeChildGraphics)
+            {
+                foreach (Graphic graphic in button.GetComponentsInChildren<Graphic>(true))
+                {
+                    graphic.color = color;
+                }
+
+                return;
+            }
+
+            if (button.targetGraphic != null)
+            {
+                button.targetGraphic.color = color;
+            }
+        }
+
+        private void ApplySpriteSwap(Button button, Sprite sprite)
+        {
+            if (!swapSpriteOnSelect || sprite == null)
+            {
+                return;
+            }
+
+            Image image = button.image;
+            if (image != null)
+            {
+                image.sprite = sprite;
+            }
+        }
+
+        private void CachePageTransform(GameObject page)
+        {
+            if (page == null)
+            {
+                return;
+            }
+
+            RectTransform rectTransform = page.GetComponent<RectTransform>();
+            if (rectTransform == null || _pageAnchors.ContainsKey(page))
+            {
+                return;
+            }
+
+            _pageAnchors[page] = rectTransform.anchoredPosition;
+        }
+
+        private void SetPageActive(GameObject page, bool isActive)
+        {
+            if (page == null)
+            {
+                return;
+            }
+
+            if (_pageTransitions.TryGetValue(page, out Coroutine running) && running != null)
+            {
+                StopCoroutine(running);
+                _pageTransitions.Remove(page);
+            }
+
+            CanvasGroup canvasGroup = page.GetComponent<CanvasGroup>();
+            RectTransform rectTransform = page.GetComponent<RectTransform>();
+
+            if (enablePageTransitions && canvasGroup == null)
+            {
+                canvasGroup = page.AddComponent<CanvasGroup>();
+            }
+
+            if (!isActive)
+            {
+                if (!enablePageTransitions || canvasGroup == null || rectTransform == null || !page.activeSelf)
+                {
+                    page.SetActive(false);
+                    return;
+                }
+
+                Vector2 anchor = GetOrCacheAnchor(page, rectTransform);
+                canvasGroup.interactable = false;
+                canvasGroup.blocksRaycasts = false;
+                _pageTransitions[page] = StartCoroutine(AnimatePageOut(page, canvasGroup, rectTransform, anchor));
+                return;
+            }
+
+            page.SetActive(true);
+
+            if (!enablePageTransitions || canvasGroup == null || rectTransform == null)
+            {
+                return;
+            }
+
+            Vector2 activeAnchor = GetOrCacheAnchor(page, rectTransform);
+            canvasGroup.alpha = 0f;
+            canvasGroup.interactable = true;
+            canvasGroup.blocksRaycasts = true;
+            rectTransform.anchoredPosition = activeAnchor + pageSlideOffset;
+
+            _pageTransitions[page] = StartCoroutine(AnimatePageIn(page, canvasGroup, rectTransform, activeAnchor));
+        }
+
+        private Vector2 GetOrCacheAnchor(GameObject page, RectTransform rectTransform)
+        {
+            if (_pageAnchors.TryGetValue(page, out Vector2 anchor))
+            {
+                return anchor;
+            }
+
+            anchor = rectTransform.anchoredPosition;
+            _pageAnchors[page] = anchor;
+            return anchor;
+        }
+
+        private IEnumerator AnimatePageIn(GameObject page, CanvasGroup canvasGroup, RectTransform rectTransform, Vector2 targetPosition)
+        {
+            float duration = Mathf.Max(0.01f, pageFadeDuration);
+            float elapsed = 0f;
+            Vector2 startPosition = rectTransform.anchoredPosition;
+
+            while (elapsed < duration)
+            {
+                elapsed += Time.unscaledDeltaTime;
+                float t = Mathf.Clamp01(elapsed / duration);
+                canvasGroup.alpha = Mathf.Lerp(0f, 1f, t);
+                rectTransform.anchoredPosition = Vector2.Lerp(startPosition, targetPosition, t);
+                yield return null;
+            }
+
+            canvasGroup.alpha = 1f;
+            rectTransform.anchoredPosition = targetPosition;
+            _pageTransitions.Remove(page);
+        }
+
+        private IEnumerator AnimatePageOut(GameObject page, CanvasGroup canvasGroup, RectTransform rectTransform, Vector2 anchorPosition)
+        {
+            float duration = Mathf.Max(0.01f, pageFadeDuration);
+            float elapsed = 0f;
+            Vector2 startPosition = rectTransform.anchoredPosition;
+            Vector2 targetPosition = anchorPosition - pageSlideOffset;
+            float startAlpha = canvasGroup.alpha;
+
+            while (elapsed < duration)
+            {
+                elapsed += Time.unscaledDeltaTime;
+                float t = Mathf.Clamp01(elapsed / duration);
+                canvasGroup.alpha = Mathf.Lerp(startAlpha, 0f, t);
+                rectTransform.anchoredPosition = Vector2.Lerp(startPosition, targetPosition, t);
+                yield return null;
+            }
+
+            canvasGroup.alpha = 0f;
+            rectTransform.anchoredPosition = targetPosition;
+            page.SetActive(false);
+            _pageTransitions.Remove(page);
         }
     }
 }

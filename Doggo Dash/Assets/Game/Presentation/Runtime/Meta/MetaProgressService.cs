@@ -1,6 +1,7 @@
 using Game.Application.Ports;
 using Game.Application.Services;
 using Game.Infrastructure.Persistence;
+using System.Collections.Generic;
 
 namespace Game.Presentation.Runtime.Meta
 {
@@ -13,7 +14,7 @@ namespace Game.Presentation.Runtime.Meta
         {
             _save = save;
             _data = _save.Load();
-            ProgressClampUtility.ClampProgress(_data);
+            ClampProgressSafely();
         }
 
         public PlayerProgressData Data => _data;
@@ -21,12 +22,12 @@ namespace Game.Presentation.Runtime.Meta
         public void Reload()
         {
             _data = _save.Load();
-            ProgressClampUtility.ClampProgress(_data);
+            ClampProgressSafely();
         }
 
         public void Save()
         {
-            ProgressClampUtility.ClampProgress(_data);
+            ClampProgressSafely();
             _save.Save(_data);
         }
 
@@ -48,16 +49,90 @@ namespace Game.Presentation.Runtime.Meta
             return true;
         }
 
+        public void AddGems(int amount)
+        {
+            if (amount <= 0) return;
+            _data.totalGems += amount;
+            Save();
+        }
+
         public void SetSelectedPet(string petId)
         {
-            _data.selectedPetId = string.IsNullOrWhiteSpace(petId) ? "dog_default" : petId;
-            Save();
+            string resolvedId = string.IsNullOrWhiteSpace(petId) ? PlayerProgressData.DefaultPetId : petId;
+            bool changed = _data.selectedPetId != resolvedId;
+            _data.selectedPetId = resolvedId;
+            changed |= EnsureOwned(ShopItemType.Pet, resolvedId);
+            if (changed) Save();
         }
 
         public void SetSelectedOutfit(string outfitId)
         {
-            _data.selectedOutfitId = string.IsNullOrWhiteSpace(outfitId) ? "outfit_default" : outfitId;
-            Save();
+            string resolvedId = string.IsNullOrWhiteSpace(outfitId) ? PlayerProgressData.DefaultOutfitId : outfitId;
+            bool changed = _data.selectedOutfitId != resolvedId;
+            _data.selectedOutfitId = resolvedId;
+            changed |= EnsureOwned(ShopItemType.Outfit, resolvedId);
+            if (changed) Save();
+        }
+
+        public bool IsOwned(string itemId)
+        {
+            if (string.IsNullOrWhiteSpace(itemId)) return false;
+            return IsOwnedSafe(ShopItemType.Pet, itemId) || IsOwnedSafe(ShopItemType.Outfit, itemId);
+        }
+
+        public bool IsOwned(ShopItemType type, string itemId)
+        {
+            return IsOwnedSafe(type, itemId);
+        }
+
+        public void GrantOwnership(string itemId)
+        {
+            if (string.IsNullOrWhiteSpace(itemId)) return;
+            GrantOwnership(ShopItemType.Pet, itemId);
+            GrantOwnership(ShopItemType.Outfit, itemId);
+        }
+
+        public void GrantOwnership(ShopItemType type, string itemId)
+        {
+            if (string.IsNullOrWhiteSpace(itemId)) return;
+            if (type == ShopItemType.GemPack) return;
+            if (EnsureOwned(type, itemId))
+                Save();
+        }
+
+        private bool EnsureOwned(ShopItemType type, string itemId)
+        {
+            if (string.IsNullOrWhiteSpace(itemId)) return false;
+            List<string> list = GetOwnedList(type);
+            if (list.Contains(itemId)) return false;
+            list.Add(itemId);
+            return true;
+        }
+
+        private void ClampProgressSafely()
+        {
+            if (_data == null) return;
+            ProgressClampUtility.ClampProgress(_data);
+        }
+
+        private bool IsOwnedSafe(ShopItemType type, string itemId)
+        {
+            if (string.IsNullOrWhiteSpace(itemId)) return false;
+            if (type == ShopItemType.GemPack) return false;
+            List<string> list = GetOwnedList(type);
+            return list != null && list.Contains(itemId);
+        }
+
+        private List<string> GetOwnedList(ShopItemType type)
+        {
+            if (type == ShopItemType.Outfit)
+            {
+                _data.ownedOutfits ??= new List<string>();
+                return _data.ownedOutfits;
+            }
+
+            _data.ownedPets ??= new List<string>();
+            return _data.ownedPets;
         }
     }
 }

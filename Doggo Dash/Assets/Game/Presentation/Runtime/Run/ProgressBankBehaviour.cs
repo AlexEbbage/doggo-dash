@@ -2,6 +2,8 @@ using UnityEngine;
 using TMPro;
 using Game.Application.Ports;
 using Game.Infrastructure.Persistence;
+using Game.Application.Services;
+using Game.Presentation.Runtime.Meta;
 
 namespace Game.Presentation.Runtime.Run
 {
@@ -11,6 +13,7 @@ namespace Game.Presentation.Runtime.Run
         public RunStateControllerBehaviour runState = default!;
         public RunRewardTrackerBehaviour runRewards = default!;
         public ScoreDistanceControllerBehaviour scoreDistance = default!;
+        public EnergySpeedControllerBehaviour energy = default!;
 
         [Header("Optional UI")]
         public TMP_Text totalKibbleText;
@@ -18,8 +21,20 @@ namespace Game.Presentation.Runtime.Run
         public TMP_Text bestScoreText;
         public TMP_Text bestDistanceText;
 
+        [Header("XP")]
+        [Min(0f)]
+        public float xpPerMeter = 1f;
+        [Min(0)]
+        public int xpPerKibble = 1;
+        [Min(1)]
+        public int fallbackXpToNext = 100;
+        
+        [Header("Challenges")]
+        public ChallengeDataSO challengeData;
+
         private IProgressSaveGateway _save = default!;
         private PlayerProgressData _data = default!;
+        private ChallengesService _challenges;
         private bool _bankedThisFail;
 
         public PlayerProgressData Data => _data;
@@ -28,6 +43,11 @@ namespace Game.Presentation.Runtime.Run
         {
             _save = new PlayerPrefsProgressSaveGateway();
             _data = _save.Load();
+            if (energy == null)
+            {
+                energy = FindObjectOfType<EnergySpeedControllerBehaviour>();
+            }
+            InitializeChallenges();
             RefreshUI();
         }
 
@@ -58,6 +78,25 @@ namespace Game.Presentation.Runtime.Run
                 if (score > _data.bestScore) _data.bestScore = score;
                 if (dist > _data.bestDistanceMeters) _data.bestDistanceMeters = dist;
             }
+            
+            if (_challenges != null)
+            {
+                float distance = scoreDistance != null ? scoreDistance.DistanceMeters : 0f;
+                int treats = runRewards != null ? runRewards.Kibble : 0;
+                int gems = runRewards != null ? runRewards.Gems : 0;
+                int badFoodHits = runRewards != null ? runRewards.BadFoodHits : 0;
+                _challenges.ResetIfNeeded(System.DateTimeOffset.UtcNow);
+                _challenges.ApplyRunResults(distance, treats, gems, badFoodHits);
+            }
+
+            int xpGain = ComputeXpGain();
+            ApplyXpGain(xpGain);
+
+            if (energy != null)
+            {
+                _data.energyCurrent = energy.EnergyCurrent;
+                _data.energyMax = energy.EnergyMax;
+            }
 
             _save.Save(_data);
             RefreshUI();
@@ -66,6 +105,7 @@ namespace Game.Presentation.Runtime.Run
         public void ForceReload()
         {
             _data = _save.Load();
+            InitializeChallenges();
             RefreshUI();
         }
 
@@ -73,7 +113,23 @@ namespace Game.Presentation.Runtime.Run
         {
             _data = new PlayerProgressData();
             _save.Save(_data);
+            InitializeChallenges();
             RefreshUI();
+        }
+
+        private void InitializeChallenges()
+        {
+            if (challengeData == null)
+            {
+                _challenges = null;
+                return;
+            }
+
+            _challenges = new ChallengesService(_data, challengeData.BuildDefinitions());
+            if (_challenges.ResetIfNeeded(System.DateTimeOffset.UtcNow) | _challenges.EnsureEntries())
+            {
+                _save.Save(_data);
+            }
         }
 
         private void RefreshUI()
@@ -82,6 +138,40 @@ namespace Game.Presentation.Runtime.Run
             if (totalGemsText != null) totalGemsText.text = $"{_data.totalGems}";
             if (bestScoreText != null) bestScoreText.text = $"{_data.bestScore}";
             if (bestDistanceText != null) bestDistanceText.text = $"{Mathf.FloorToInt(_data.bestDistanceMeters)}m";
+        }
+
+        private int ComputeXpGain()
+        {
+            int xpGain = 0;
+            if (runRewards != null)
+            {
+                xpGain += runRewards.Kibble * xpPerKibble;
+            }
+
+            if (scoreDistance != null)
+            {
+                xpGain += Mathf.FloorToInt(scoreDistance.DistanceMeters * xpPerMeter);
+            }
+
+            return xpGain;
+        }
+
+        private void ApplyXpGain(int xpGain)
+        {
+            if (xpGain <= 0) return;
+
+            if (_data.level <= 0) _data.level = 1;
+            if (_data.xp < 0) _data.xp = 0;
+            if (_data.xpToNext <= 0) _data.xpToNext = Mathf.Max(1, fallbackXpToNext);
+
+            _data.xp += xpGain;
+            while (_data.xp >= _data.xpToNext)
+            {
+                _data.xp -= _data.xpToNext;
+                _data.level += 1;
+            }
+
+            _data.lastXpTimestampUtc = System.DateTimeOffset.UtcNow.ToUnixTimeSeconds();
         }
     }
 }
