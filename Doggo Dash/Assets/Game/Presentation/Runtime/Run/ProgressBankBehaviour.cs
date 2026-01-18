@@ -92,14 +92,15 @@ namespace Game.Presentation.Runtime.Run
             int xpGain = ComputeXpGain();
             ApplyXpGain(xpGain);
 
-            if (energy != null)
-            {
-                _data.energyCurrent = energy.EnergyCurrent;
-                _data.energyMax = energy.EnergyMax;
-            }
+            energy?.ApplyEnergyTo(_data);
 
             _save.Save(_data);
             RefreshUI();
+        }
+
+        private void OnDisable()
+        {
+            SaveEnergyProgress();
         }
 
         public void ForceReload()
@@ -172,6 +173,14 @@ namespace Game.Presentation.Runtime.Run
             }
 
             _data.lastXpTimestampUtc = System.DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+        }
+
+        private void SaveEnergyProgress()
+        {
+            if (_save == null || _data == null || energy == null) return;
+
+            energy.ApplyEnergyTo(_data);
+            _save.Save(_data);
         }
     }
 }
