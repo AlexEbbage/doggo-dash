@@ -18,7 +18,9 @@ namespace Game.Presentation.Runtime.Meta
         [SerializeField] private TMP_Text levelText;
         [SerializeField] private TMP_Text xpText;
         [SerializeField] private Slider xpBar;
-        [SerializeField] private int xpPerLevel = 1000;
+
+        [Header("Energy")]
+        [SerializeField] private TMP_Text energyText;
 
         [Header("Avatar")]
         [SerializeField] private Image avatarImage;
@@ -35,7 +37,6 @@ namespace Game.Presentation.Runtime.Meta
         private MetaProgressService _progress = default!;
         private bool _settingsBound;
         private bool _referencesCached;
-        private const int MinXpPerLevel = 1;
 
         private void Awake()
         {
@@ -88,11 +89,10 @@ namespace Game.Presentation.Runtime.Meta
                 gemsText.text = $"{data.totalGems}";
             }
 
-            int perLevel = Mathf.Max(MinXpPerLevel, xpPerLevel);
-            int totalXp = Mathf.Max(0, data.bestScore);
-            int level = Mathf.Max(1, (totalXp / perLevel) + 1);
-            int xpIntoLevel = totalXp % perLevel;
-            float progress = xpIntoLevel / (float)perLevel;
+            int level = Mathf.Max(1, data.level);
+            int xpCurrent = Mathf.Max(0, data.xp);
+            int xpTarget = Mathf.Max(1, data.xpToNext);
+            float progress = xpCurrent / (float)xpTarget;
 
             if (levelText != null)
             {
@@ -101,7 +101,7 @@ namespace Game.Presentation.Runtime.Meta
 
             if (xpText != null)
             {
-                xpText.text = $"{xpIntoLevel}/{perLevel} XP";
+                xpText.text = $"{xpCurrent}/{xpTarget} XP";
             }
 
             if (xpBar != null)
@@ -109,6 +109,13 @@ namespace Game.Presentation.Runtime.Meta
                 xpBar.minValue = 0f;
                 xpBar.maxValue = 1f;
                 xpBar.normalizedValue = progress;
+            }
+
+            if (energyText != null)
+            {
+                int energyCurrent = Mathf.RoundToInt(Mathf.Max(0f, data.energyCurrent));
+                int energyMax = Mathf.RoundToInt(Mathf.Max(0f, data.energyMax));
+                energyText.text = $"{energyCurrent}/{energyMax}";
             }
 
             if (avatarImage != null && avatarPlaceholder != null)
@@ -155,13 +162,18 @@ namespace Game.Presentation.Runtime.Meta
 
         private void HandleSettingsClicked()
         {
+            OpenSettingsOverlay();
+        }
+
+        public void OpenSettingsOverlay()
+        {
             if (settingsPanel != null)
             {
-                settingsPanel.SetActive(!settingsPanel.activeSelf);
+                settingsPanel.SetActive(true);
                 return;
             }
 
-            Debug.Log("Settings clicked (placeholder)");
+            Debug.Log("Settings overlay stub.");
         }
 
         private void CacheReferences(bool force = false)
@@ -216,6 +228,11 @@ namespace Game.Presentation.Runtime.Meta
             if (xpText == null)
             {
                 xpText = FindTextByName("XpText");
+            }
+
+            if (energyText == null)
+            {
+                energyText = FindTextByName("EnergyText");
             }
 
             if (selectedPetText == null)
