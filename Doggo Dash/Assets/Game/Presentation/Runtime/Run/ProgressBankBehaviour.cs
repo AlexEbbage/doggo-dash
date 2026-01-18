@@ -89,7 +89,8 @@ namespace Game.Presentation.Runtime.Run
                 _challenges.ApplyRunResults(distance, treats, gems, badFoodHits);
             }
 
-            ApplyXpGain();
+            int xpGain = ComputeXpGain();
+            ApplyXpGain(xpGain);
 
             if (energy != null)
             {
@@ -139,7 +140,7 @@ namespace Game.Presentation.Runtime.Run
             if (bestDistanceText != null) bestDistanceText.text = $"{Mathf.FloorToInt(_data.bestDistanceMeters)}m";
         }
 
-        private void ApplyXpGain()
+        private int ComputeXpGain()
         {
             int xpGain = 0;
             if (runRewards != null)
@@ -152,6 +153,11 @@ namespace Game.Presentation.Runtime.Run
                 xpGain += Mathf.FloorToInt(scoreDistance.DistanceMeters * xpPerMeter);
             }
 
+            return xpGain;
+        }
+
+        private void ApplyXpGain(int xpGain)
+        {
             if (xpGain <= 0) return;
 
             if (_data.level <= 0) _data.level = 1;
@@ -164,6 +170,8 @@ namespace Game.Presentation.Runtime.Run
                 _data.xp -= _data.xpToNext;
                 _data.level += 1;
             }
+
+            _data.lastXpTimestampUtc = System.DateTimeOffset.UtcNow.ToUnixTimeSeconds();
         }
     }
 }
