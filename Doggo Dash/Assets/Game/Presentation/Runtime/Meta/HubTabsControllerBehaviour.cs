@@ -52,6 +52,7 @@ namespace Game.Presentation.Runtime.Meta
         private HubTab _current = HubTab.Shop;
         private readonly Dictionary<GameObject, Vector2> _pageAnchors = new Dictionary<GameObject, Vector2>();
         private readonly Dictionary<GameObject, Coroutine> _pageTransitions = new Dictionary<GameObject, Coroutine>();
+        private readonly Dictionary<Button, Sprite> _defaultSprites = new Dictionary<Button, Sprite>();
 
         private void Awake()
         {
@@ -61,6 +62,12 @@ namespace Game.Presentation.Runtime.Meta
             if (tabPlay) tabPlay.onClick.AddListener(() => Show(HubTab.Play));
             if (tabChallenges) tabChallenges.onClick.AddListener(() => Show(HubTab.Challenges));
             if (tabProgression) tabProgression.onClick.AddListener(() => Show(HubTab.Progression));
+
+            CacheDefaultSprite(tabShop);
+            CacheDefaultSprite(tabCharacters);
+            CacheDefaultSprite(tabPlay);
+            CacheDefaultSprite(tabChallenges);
+            CacheDefaultSprite(tabProgression);
 
             CachePageTransform(pageShop);
             CachePageTransform(pageCharacters);
@@ -159,15 +166,44 @@ namespace Game.Presentation.Runtime.Meta
 
         private void ApplySpriteSwap(Button button, Sprite sprite)
         {
-            if (!swapSpriteOnSelect || sprite == null)
+            if (!swapSpriteOnSelect || button == null)
             {
                 return;
             }
 
             Image image = button.image;
-            if (image != null)
+            if (image == null)
             {
-                image.sprite = sprite;
+                return;
+            }
+
+            if (!_defaultSprites.ContainsKey(button))
+            {
+                _defaultSprites[button] = image.sprite;
+            }
+
+            Sprite resolvedSprite = sprite;
+            if (resolvedSprite == null && _defaultSprites.TryGetValue(button, out Sprite defaultSprite))
+            {
+                resolvedSprite = defaultSprite;
+            }
+
+            if (resolvedSprite != null)
+            {
+                image.sprite = resolvedSprite;
+            }
+        }
+
+        private void CacheDefaultSprite(Button button)
+        {
+            if (button == null || button.image == null)
+            {
+                return;
+            }
+
+            if (!_defaultSprites.ContainsKey(button))
+            {
+                _defaultSprites[button] = button.image.sprite;
             }
         }
 
