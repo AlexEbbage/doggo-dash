@@ -36,12 +36,14 @@ namespace Game.Presentation.Runtime.Meta
         private void Awake()
         {
             _progression = new MetaProgressionService(new PlayerPrefsProgressSaveGateway());
+            EnsureFallbackSetup();
             BindButtons();
             Refresh();
         }
 
         private void OnEnable()
         {
+            EnsureFallbackSetup();
             BindButtons();
             Refresh();
         }
@@ -117,6 +119,113 @@ namespace Game.Presentation.Runtime.Meta
             {
                 entry.button.interactable = !maxed;
             }
+        }
+
+        private void EnsureFallbackSetup()
+        {
+            if (upgrades != null && upgrades.Length > 0) return;
+
+            Button[] buttons = GetComponentsInChildren<Button>(true);
+            if (buttons == null || buttons.Length == 0) return;
+
+            MetaUpgradeType[] order =
+            {
+                MetaUpgradeType.EnergyMax,
+                MetaUpgradeType.StartSpeed,
+                MetaUpgradeType.GemBonus
+            };
+
+            int count = Mathf.Min(buttons.Length, order.Length);
+            upgrades = new UpgradeEntry[count];
+            for (int i = 0; i < count; i++)
+            {
+                Button button = buttons[i];
+                UpgradeEntry entry = new UpgradeEntry
+                {
+                    upgradeType = order[i],
+                    button = button
+                };
+
+                EnsureEntryText(entry, button.transform);
+                upgrades[i] = entry;
+            }
+
+            if (feedbackText == null)
+            {
+                feedbackText = CreateTextElement(transform, "UpgradeFeedbackText", 18f, TextAlignmentOptions.Center);
+                if (feedbackText != null) feedbackText.text = string.Empty;
+            }
+        }
+
+        private void EnsureEntryText(UpgradeEntry entry, Transform parent)
+        {
+            if (entry == null || parent == null) return;
+
+            Transform textGroup = parent.Find("UpgradeTextGroup");
+            if (textGroup == null)
+            {
+                textGroup = CreateTextGroup(parent);
+            }
+
+            entry.titleText ??= FindOrCreateText(textGroup, "TitleText", 18f);
+            entry.levelText ??= FindOrCreateText(textGroup, "LevelText", 14f);
+            entry.costText ??= FindOrCreateText(textGroup, "CostText", 14f);
+        }
+
+        private static Transform CreateTextGroup(Transform parent)
+        {
+            var groupObject = new GameObject("UpgradeTextGroup", typeof(RectTransform));
+            RectTransform rectTransform = groupObject.GetComponent<RectTransform>();
+            rectTransform.SetParent(parent, false);
+            rectTransform.anchorMin = new Vector2(0f, 0f);
+            rectTransform.anchorMax = new Vector2(1f, 1f);
+            rectTransform.offsetMin = new Vector2(6f, 6f);
+            rectTransform.offsetMax = new Vector2(-6f, -6f);
+
+            VerticalLayoutGroup layout = groupObject.AddComponent<VerticalLayoutGroup>();
+            layout.childAlignment = TextAnchor.MiddleCenter;
+            layout.spacing = 2f;
+            layout.childControlHeight = true;
+            layout.childControlWidth = true;
+            layout.childForceExpandHeight = false;
+            layout.childForceExpandWidth = true;
+
+            ContentSizeFitter fitter = groupObject.AddComponent<ContentSizeFitter>();
+            fitter.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
+            fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+
+            return rectTransform;
+        }
+
+        private static TMP_Text FindOrCreateText(Transform parent, string name, float fontSize)
+        {
+            if (parent == null) return null;
+            Transform existing = parent.Find(name);
+            if (existing != null)
+            {
+                TMP_Text existingText = existing.GetComponent<TMP_Text>();
+                if (existingText != null) return existingText;
+            }
+
+            return CreateTextElement(parent, name, fontSize, TextAlignmentOptions.Center);
+        }
+
+        private static TMP_Text CreateTextElement(Transform parent, string name, float fontSize, TextAlignmentOptions alignment)
+        {
+            var textObject = new GameObject(name, typeof(RectTransform), typeof(TextMeshProUGUI));
+            RectTransform rectTransform = textObject.GetComponent<RectTransform>();
+            rectTransform.SetParent(parent, false);
+            rectTransform.anchorMin = new Vector2(0f, 0f);
+            rectTransform.anchorMax = new Vector2(1f, 1f);
+            rectTransform.sizeDelta = Vector2.zero;
+
+            TextMeshProUGUI text = textObject.GetComponent<TextMeshProUGUI>();
+            text.text = string.Empty;
+            text.fontSize = fontSize;
+            text.alignment = alignment;
+            text.raycastTarget = false;
+
+            return text;
         }
 
         private void HandlePurchase(MetaUpgradeType upgradeType)

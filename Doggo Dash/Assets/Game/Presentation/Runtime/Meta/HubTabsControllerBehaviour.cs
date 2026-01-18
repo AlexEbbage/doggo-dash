@@ -68,6 +68,11 @@ namespace Game.Presentation.Runtime.Meta
             CachePageTransform(pageChallenges);
             CachePageTransform(pageProgression);
 
+            if (pageProgression != null && pageProgression.GetComponent<ProgressionPageControllerBehaviour>() == null)
+            {
+                pageProgression.AddComponent<ProgressionPageControllerBehaviour>();
+            }
+
             Show(_current);
         }
 
