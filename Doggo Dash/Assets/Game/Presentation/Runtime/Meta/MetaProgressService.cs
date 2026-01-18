@@ -1,6 +1,7 @@
 using Game.Application.Ports;
 using Game.Application.Services;
 using Game.Infrastructure.Persistence;
+using System.Collections.Generic;
 
 namespace Game.Presentation.Runtime.Meta
 {
@@ -50,14 +51,67 @@ namespace Game.Presentation.Runtime.Meta
 
         public void SetSelectedPet(string petId)
         {
-            _data.selectedPetId = string.IsNullOrWhiteSpace(petId) ? "dog_default" : petId;
-            Save();
+            string resolvedId = string.IsNullOrWhiteSpace(petId) ? "dog_default" : petId;
+            bool changed = _data.selectedPetId != resolvedId;
+            _data.selectedPetId = resolvedId;
+            changed |= EnsureOwned(ShopItemType.Pet, resolvedId);
+            if (changed) Save();
         }
 
         public void SetSelectedOutfit(string outfitId)
         {
-            _data.selectedOutfitId = string.IsNullOrWhiteSpace(outfitId) ? "outfit_default" : outfitId;
-            Save();
+            string resolvedId = string.IsNullOrWhiteSpace(outfitId) ? "outfit_default" : outfitId;
+            bool changed = _data.selectedOutfitId != resolvedId;
+            _data.selectedOutfitId = resolvedId;
+            changed |= EnsureOwned(ShopItemType.Outfit, resolvedId);
+            if (changed) Save();
+        }
+
+        public bool IsOwned(string itemId)
+        {
+            if (string.IsNullOrWhiteSpace(itemId)) return false;
+            return IsOwned(ShopItemType.Pet, itemId) || IsOwned(ShopItemType.Outfit, itemId);
+        }
+
+        public bool IsOwned(ShopItemType type, string itemId)
+        {
+            if (string.IsNullOrWhiteSpace(itemId)) return false;
+            return GetOwnedList(type).Contains(itemId);
+        }
+
+        public void GrantOwnership(string itemId)
+        {
+            if (string.IsNullOrWhiteSpace(itemId)) return;
+            GrantOwnership(ShopItemType.Pet, itemId);
+            GrantOwnership(ShopItemType.Outfit, itemId);
+        }
+
+        public void GrantOwnership(ShopItemType type, string itemId)
+        {
+            if (string.IsNullOrWhiteSpace(itemId)) return;
+            if (EnsureOwned(type, itemId))
+                Save();
+        }
+
+        private bool EnsureOwned(ShopItemType type, string itemId)
+        {
+            if (string.IsNullOrWhiteSpace(itemId)) return false;
+            List<string> list = GetOwnedList(type);
+            if (list.Contains(itemId)) return false;
+            list.Add(itemId);
+            return true;
+        }
+
+        private List<string> GetOwnedList(ShopItemType type)
+        {
+            if (type == ShopItemType.Outfit)
+            {
+                _data.ownedOutfits ??= new List<string>();
+                return _data.ownedOutfits;
+            }
+
+            _data.ownedPets ??= new List<string>();
+            return _data.ownedPets;
         }
     }
 }

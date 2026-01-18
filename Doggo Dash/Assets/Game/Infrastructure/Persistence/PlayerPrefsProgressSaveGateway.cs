@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using Game.Application.Ports;
 using Game.Application.Services;
@@ -89,6 +90,13 @@ namespace Game.Infrastructure.Persistence
             }
 
             data.challengeProgress ??= new System.Collections.Generic.List<ChallengeProgressEntry>();
+            if (string.IsNullOrWhiteSpace(data.selectedPetId)) data.selectedPetId = "dog_default";
+            if (string.IsNullOrWhiteSpace(data.selectedOutfitId)) data.selectedOutfitId = "outfit_default";
+
+            if (data.ownedPets == null) data.ownedPets = new List<string>();
+            if (data.ownedOutfits == null) data.ownedOutfits = new List<string>();
+            EnsureOwned(data.ownedPets, data.selectedPetId);
+            EnsureOwned(data.ownedOutfits, data.selectedOutfitId);
 
             ProgressClampUtility.ClampProgress(data);
         }
@@ -97,6 +105,11 @@ namespace Game.Infrastructure.Persistence
         {
             int diff = (7 + (int)utcDate.DayOfWeek - (int)DayOfWeek.Monday) % 7;
             return utcDate.AddDays(-diff);
+        private static void EnsureOwned(List<string> ownedList, string itemId)
+        {
+            if (ownedList == null) return;
+            if (string.IsNullOrWhiteSpace(itemId)) return;
+            if (!ownedList.Contains(itemId)) ownedList.Add(itemId);
         }
     }
 }

@@ -31,9 +31,15 @@ namespace Game.Application.Ports
         public long lastWeeklyChallengesResetUtc;
 
         public List<ChallengeProgressEntry> challengeProgress = new();
+        public int upgradeEnergyMax;
+        public int upgradeStartSpeed;
+        public int upgradeGemBonus;
 
         public string selectedPetId = "dog_default";
         public string selectedOutfitId = "outfit_default";
+
+        public List<string> ownedPets = new List<string>();
+        public List<string> ownedOutfits = new List<string>();
     }
 
     [System.Serializable]
