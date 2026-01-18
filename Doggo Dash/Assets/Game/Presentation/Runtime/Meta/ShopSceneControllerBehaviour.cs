@@ -39,16 +39,35 @@ namespace Game.Presentation.Runtime.Meta
             ShowCurrentItem();
         }
 
+        private void OnEnable()
+        {
+            NormalizeSceneNames();
+            RefreshAll();
+            ShowCurrentItem();
+        }
+
         private void RefreshAll()
         {
+            if (_progress == null)
+            {
+                _progress = new MetaProgressService(new PlayerPrefsProgressSaveGateway());
+            }
+
             _progress.Reload();
             var d = _progress.Data;
 
             if (totalKibbleText != null) totalKibbleText.text = $"{d.totalKibble}";
             if (totalGemsText != null) totalGemsText.text = $"{d.totalGems}";
 
-            if (selectedPetText != null) selectedPetText.text = $"Pet: {d.selectedPetId}";
-            if (selectedOutfitText != null) selectedOutfitText.text = $"Outfit: {d.selectedOutfitId}";
+            if (selectedPetText != null)
+            {
+                selectedPetText.text = MetaProgressTextFormatter.BuildSelectionLabel("Pet", d.selectedPetId);
+            }
+
+            if (selectedOutfitText != null)
+            {
+                selectedOutfitText.text = MetaProgressTextFormatter.BuildSelectionLabel("Outfit", d.selectedOutfitId);
+            }
         }
 
         private ShopItemSO CurrentItem
