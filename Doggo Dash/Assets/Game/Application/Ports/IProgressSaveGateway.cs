@@ -27,6 +27,10 @@ namespace Game.Application.Ports
         public long lastEnergyTimestampUtc;
         public long lastXpTimestampUtc;
 
+        public long lastDailyChallengesResetUtc;
+        public long lastWeeklyChallengesResetUtc;
+
+        public List<ChallengeProgressEntry> challengeProgress = new();
         public int upgradeEnergyMax;
         public int upgradeStartSpeed;
         public int upgradeGemBonus;
@@ -36,5 +40,14 @@ namespace Game.Application.Ports
 
         public List<string> ownedPets = new List<string>();
         public List<string> ownedOutfits = new List<string>();
+    }
+
+    [System.Serializable]
+    public sealed class ChallengeProgressEntry
+    {
+        public string id = string.Empty;
+        public float progress;
+        public bool completed;
+        public long completedUtcSeconds;
     }
 }

@@ -77,6 +77,19 @@ namespace Game.Infrastructure.Persistence
             if (data.lastEnergyTimestampUtc <= 0) data.lastEnergyTimestampUtc = now;
             if (data.lastXpTimestampUtc <= 0) data.lastXpTimestampUtc = now;
 
+            DateTimeOffset today = DateTimeOffset.UtcNow.Date;
+            if (data.lastDailyChallengesResetUtc <= 0)
+            {
+                data.lastDailyChallengesResetUtc = today.ToUnixTimeSeconds();
+            }
+
+            if (data.lastWeeklyChallengesResetUtc <= 0)
+            {
+                DateTimeOffset weekStart = GetWeekStartUtc(today);
+                data.lastWeeklyChallengesResetUtc = weekStart.ToUnixTimeSeconds();
+            }
+
+            data.challengeProgress ??= new System.Collections.Generic.List<ChallengeProgressEntry>();
             if (string.IsNullOrWhiteSpace(data.selectedPetId)) data.selectedPetId = "dog_default";
             if (string.IsNullOrWhiteSpace(data.selectedOutfitId)) data.selectedOutfitId = "outfit_default";
 
@@ -88,6 +101,10 @@ namespace Game.Infrastructure.Persistence
             ProgressClampUtility.ClampProgress(data);
         }
 
+        private static DateTimeOffset GetWeekStartUtc(DateTimeOffset utcDate)
+        {
+            int diff = (7 + (int)utcDate.DayOfWeek - (int)DayOfWeek.Monday) % 7;
+            return utcDate.AddDays(-diff);
         private static void EnsureOwned(List<string> ownedList, string itemId)
         {
             if (ownedList == null) return;
