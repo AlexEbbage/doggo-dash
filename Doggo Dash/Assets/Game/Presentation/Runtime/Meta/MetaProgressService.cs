@@ -49,6 +49,13 @@ namespace Game.Presentation.Runtime.Meta
             return true;
         }
 
+        public void AddGems(int amount)
+        {
+            if (amount <= 0) return;
+            _data.totalGems += amount;
+            Save();
+        }
+
         public void SetSelectedPet(string petId)
         {
             string resolvedId = string.IsNullOrWhiteSpace(petId) ? "dog_default" : petId;
@@ -76,6 +83,7 @@ namespace Game.Presentation.Runtime.Meta
         public bool IsOwned(ShopItemType type, string itemId)
         {
             if (string.IsNullOrWhiteSpace(itemId)) return false;
+            if (type == ShopItemType.GemPack) return false;
             return GetOwnedList(type).Contains(itemId);
         }
 
@@ -89,6 +97,7 @@ namespace Game.Presentation.Runtime.Meta
         public void GrantOwnership(ShopItemType type, string itemId)
         {
             if (string.IsNullOrWhiteSpace(itemId)) return;
+            if (type == ShopItemType.GemPack) return;
             if (EnsureOwned(type, itemId))
                 Save();
         }
