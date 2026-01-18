@@ -29,6 +29,9 @@ namespace Game.Presentation.Runtime.Meta
         [SerializeField] private TMP_Text totalKibbleText;
         [SerializeField] private TMP_Text totalGemsText;
         [SerializeField] private TMP_Text feedbackText;
+        [SerializeField] private TMP_Text selectedPetText;
+        [SerializeField] private TMP_Text selectedOutfitText;
+        [SerializeField] private TMP_Text challengeSummaryText;
 
         private MetaProgressionService _progression = default!;
         private bool _bound;
@@ -68,6 +71,20 @@ namespace Game.Presentation.Runtime.Meta
 
             if (totalKibbleText != null) totalKibbleText.text = $"{data.totalKibble}";
             if (totalGemsText != null) totalGemsText.text = $"{data.totalGems}";
+            if (selectedPetText != null)
+            {
+                selectedPetText.text = MetaProgressTextFormatter.BuildSelectionLabel("Selected pet", data.selectedPetId);
+            }
+
+            if (selectedOutfitText != null)
+            {
+                selectedOutfitText.text = MetaProgressTextFormatter.BuildSelectionLabel("Selected outfit", data.selectedOutfitId);
+            }
+
+            if (challengeSummaryText != null)
+            {
+                challengeSummaryText.text = MetaProgressTextFormatter.BuildChallengeSummary(data);
+            }
 
             if (upgrades == null) return;
             foreach (UpgradeEntry entry in upgrades)

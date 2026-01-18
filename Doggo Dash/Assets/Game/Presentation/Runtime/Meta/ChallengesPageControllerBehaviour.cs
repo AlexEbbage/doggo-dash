@@ -18,6 +18,8 @@ namespace Game.Presentation.Runtime.Meta
 
         [Header("Summary")]
         [SerializeField] private TMP_Text completionSummaryText;
+        [SerializeField] private TMP_Text selectedPetText;
+        [SerializeField] private TMP_Text selectedOutfitText;
 
         private IProgressSaveGateway _save;
         private PlayerProgressData _data;
@@ -49,6 +51,7 @@ namespace Game.Presentation.Runtime.Meta
             {
                 SetSlotsInactive();
                 UpdateSummary();
+                UpdateSelections();
                 return;
             }
 
@@ -93,6 +96,7 @@ namespace Game.Presentation.Runtime.Meta
             }
 
             UpdateSummary();
+            UpdateSelections();
         }
 
         private void InitializeService()
@@ -167,6 +171,24 @@ namespace Game.Presentation.Runtime.Meta
                 completed,
                 total,
                 claimed);
+        }
+
+        private void UpdateSelections()
+        {
+            if (_data == null)
+            {
+                return;
+            }
+
+            if (selectedPetText != null)
+            {
+                selectedPetText.text = MetaProgressTextFormatter.BuildSelectionLabel("Selected pet", _data.selectedPetId);
+            }
+
+            if (selectedOutfitText != null)
+            {
+                selectedOutfitText.text = MetaProgressTextFormatter.BuildSelectionLabel("Selected outfit", _data.selectedOutfitId);
+            }
         }
 
         [System.Serializable]
