@@ -9,6 +9,7 @@ namespace Game.Presentation.Runtime.UI
     {
         [Header("Refs")]
         public RunStateControllerBehaviour runState = default!;
+        public RunResetControllerBehaviour runReset;
         public RunRewardTrackerBehaviour rewards = default!;
         public ScoreDistanceControllerBehaviour scoreDistance = default!;
 
@@ -69,6 +70,8 @@ namespace Game.Presentation.Runtime.UI
                 return;
             }
 
+            Time.timeScale = 1f;
+            runReset?.ResetRun();
             SceneManager.LoadScene(hubSceneName);
         }
     }

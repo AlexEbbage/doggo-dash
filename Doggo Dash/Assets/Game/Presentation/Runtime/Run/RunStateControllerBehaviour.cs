@@ -11,6 +11,7 @@ namespace Game.Presentation.Runtime.Run
         [Header("Refs")]
         public MonoBehaviour runnerControllerBehaviour = default!;
         public MonoBehaviour collisionReporterBehaviour = default!;
+        public RunResetControllerBehaviour runReset;
 
         [Header("Feedback (optional)")]
         public RunFeedbackControllerBehaviour feedback;
@@ -39,6 +40,7 @@ namespace Game.Presentation.Runtime.Run
         public void RestartScene()
         {
             Time.timeScale = 1f;
+            runReset?.ResetRun();
             var scene = SceneManager.GetActiveScene();
             SceneManager.LoadScene(scene.buildIndex);
         }
