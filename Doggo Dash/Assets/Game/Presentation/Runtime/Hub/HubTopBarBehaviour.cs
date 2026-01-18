@@ -12,6 +12,10 @@ namespace Game.Presentation.Runtime.Hub
         [SerializeField] private TMP_Text levelText;
         [SerializeField] private Slider xpBar;
 
+        [Header("Selections")]
+        [SerializeField] private TMP_Text selectedPetText;
+        [SerializeField] private TMP_Text selectedOutfitText;
+
         [Header("XP")]
         [Min(1)]
         [SerializeField] private int fallbackXpToNext = 100;
@@ -50,6 +54,16 @@ namespace Game.Presentation.Runtime.Hub
                 xpBar.minValue = 0f;
                 xpBar.maxValue = xpToNext;
                 xpBar.value = xpValue;
+            }
+
+            if (selectedPetText != null)
+            {
+                selectedPetText.text = $"Pet: {data.selectedPetId}";
+            }
+
+            if (selectedOutfitText != null)
+            {
+                selectedOutfitText.text = $"Outfit: {data.selectedOutfitId}";
             }
         }
     }
