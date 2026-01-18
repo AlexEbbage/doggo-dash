@@ -34,6 +34,15 @@ namespace Game.Application.Services
             }
         }
 
+        public void Initialize(float maxEnergy, float currentEnergy)
+        {
+            _energy.Max = maxEnergy <= 0f ? 1f : maxEnergy;
+            _energy.Current = currentEnergy;
+            if (_energy.Current < 0f) _energy.Current = 0f;
+            if (_energy.Current > _energy.Max) _energy.Current = _energy.Max;
+            _slowRemaining = 0f;
+        }
+
         public void Reset()
         {
             _energy.Max = _config.MaxEnergy <= 0f ? 1f : _config.MaxEnergy;

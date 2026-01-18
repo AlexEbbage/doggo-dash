@@ -2,6 +2,8 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using TMPro;
 using Game.Presentation.Runtime.Run;
+using Game.Application.Ports;
+using Game.Infrastructure.Persistence;
 
 namespace Game.Presentation.Runtime.UI
 {
@@ -11,6 +13,7 @@ namespace Game.Presentation.Runtime.UI
         public RunStateControllerBehaviour runState = default!;
         public RunRewardTrackerBehaviour rewards = default!;
         public ScoreDistanceControllerBehaviour scoreDistance = default!;
+        public EnergySpeedControllerBehaviour energy = default!;
 
         [Header("UI")]
         public GameObject panelRoot = default!;
@@ -25,6 +28,8 @@ namespace Game.Presentation.Runtime.UI
         {
             if (panelRoot != null)
                 panelRoot.SetActive(false);
+            if (energy == null)
+                energy = FindObjectOfType<EnergySpeedControllerBehaviour>();
         }
 
         private void Update()
@@ -69,7 +74,19 @@ namespace Game.Presentation.Runtime.UI
                 return;
             }
 
+            SaveEnergyProgress();
             SceneManager.LoadScene(hubSceneName);
+        }
+
+        private void SaveEnergyProgress()
+        {
+            if (energy == null) return;
+
+            IProgressSaveGateway save = new PlayerPrefsProgressSaveGateway();
+            PlayerProgressData data = save.Load();
+            data.energyCurrent = energy.EnergyCurrent;
+            data.energyMax = energy.EnergyMax;
+            save.Save(data);
         }
     }
 }
