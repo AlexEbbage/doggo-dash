@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace Game.Application.Ports
 {
     public interface IProgressSaveGateway
@@ -15,11 +17,37 @@ namespace Game.Application.Ports
         public int bestScore;
         public float bestDistanceMeters;
 
-        public int xp;
         public int level = 1;
+        public int xp;
         public int xpToNext = 100;
+
+        public float energyCurrent = 100f;
+        public float energyMax = 100f;
+
+        public long lastEnergyTimestampUtc;
+        public long lastXpTimestampUtc;
+
+        public long lastDailyChallengesResetUtc;
+        public long lastWeeklyChallengesResetUtc;
+
+        public List<ChallengeProgressEntry> challengeProgress = new();
+        public int upgradeEnergyMax;
+        public int upgradeStartSpeed;
+        public int upgradeGemBonus;
 
         public string selectedPetId = "dog_default";
         public string selectedOutfitId = "outfit_default";
+
+        public List<string> ownedPets = new List<string>();
+        public List<string> ownedOutfits = new List<string>();
+    }
+
+    [System.Serializable]
+    public sealed class ChallengeProgressEntry
+    {
+        public string id = string.Empty;
+        public float progress;
+        public bool completed;
+        public long completedUtcSeconds;
     }
 }

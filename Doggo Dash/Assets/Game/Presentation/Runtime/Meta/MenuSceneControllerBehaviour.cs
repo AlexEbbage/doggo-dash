@@ -10,7 +10,7 @@ namespace Game.Presentation.Runtime.Meta
     {
         [Header("Scenes")]
         public string gameSceneName = "Game";
-        public string shopSceneName = "Shop";
+        public string shopSceneName = "Hub";
 
         [Header("UI")]
         public TMP_Text totalKibbleText;

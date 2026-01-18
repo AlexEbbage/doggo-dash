@@ -2,6 +2,8 @@ using UnityEngine;
 using TMPro;
 using Game.Application.Ports;
 using Game.Infrastructure.Persistence;
+using Game.Application.Services;
+using Game.Presentation.Runtime.Meta;
 
 namespace Game.Presentation.Runtime.Run
 {
@@ -25,9 +27,13 @@ namespace Game.Presentation.Runtime.Run
         public int xpPerKibble = 1;
         [Min(1)]
         public int fallbackXpToNext = 100;
+        
+        [Header("Challenges")]
+        public ChallengeDataSO challengeData;
 
         private IProgressSaveGateway _save = default!;
         private PlayerProgressData _data = default!;
+        private ChallengesService _challenges;
         private bool _bankedThisFail;
 
         public PlayerProgressData Data => _data;
@@ -36,6 +42,7 @@ namespace Game.Presentation.Runtime.Run
         {
             _save = new PlayerPrefsProgressSaveGateway();
             _data = _save.Load();
+            InitializeChallenges();
             RefreshUI();
         }
 
@@ -66,6 +73,16 @@ namespace Game.Presentation.Runtime.Run
                 if (score > _data.bestScore) _data.bestScore = score;
                 if (dist > _data.bestDistanceMeters) _data.bestDistanceMeters = dist;
             }
+            
+            if (_challenges != null)
+            {
+                float distance = scoreDistance != null ? scoreDistance.DistanceMeters : 0f;
+                int treats = runRewards != null ? runRewards.Kibble : 0;
+                int gems = runRewards != null ? runRewards.Gems : 0;
+                int badFoodHits = runRewards != null ? runRewards.BadFoodHits : 0;
+                _challenges.ResetIfNeeded(System.DateTimeOffset.UtcNow);
+                _challenges.ApplyRunResults(distance, treats, gems, badFoodHits);
+            }
 
             ApplyXpGain();
 
@@ -76,6 +93,7 @@ namespace Game.Presentation.Runtime.Run
         public void ForceReload()
         {
             _data = _save.Load();
+            InitializeChallenges();
             RefreshUI();
         }
 
@@ -83,7 +101,23 @@ namespace Game.Presentation.Runtime.Run
         {
             _data = new PlayerProgressData();
             _save.Save(_data);
+            InitializeChallenges();
             RefreshUI();
+        }
+
+        private void InitializeChallenges()
+        {
+            if (challengeData == null)
+            {
+                _challenges = null;
+                return;
+            }
+
+            _challenges = new ChallengesService(_data, challengeData.BuildDefinitions());
+            if (_challenges.ResetIfNeeded(System.DateTimeOffset.UtcNow) | _challenges.EnsureEntries())
+            {
+                _save.Save(_data);
+            }
         }
 
         private void RefreshUI()
