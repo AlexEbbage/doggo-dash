@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.Serialization;
 using TMPro;
 using Game.Infrastructure.Persistence;
 
@@ -7,8 +8,11 @@ namespace Game.Presentation.Runtime.Meta
 {
     public sealed class ShopSceneControllerBehaviour : MonoBehaviour
     {
+        private const string HubSceneName = "Hub";
+
         [Header("Scenes")]
-        public string menuSceneName = "Hub";
+        [FormerlySerializedAs("menuSceneName")]
+        public string hubSceneName = HubSceneName;
 
         [Header("Catalog")]
         public ShopCatalogSO catalog = default!;
@@ -29,6 +33,7 @@ namespace Game.Presentation.Runtime.Meta
         private void Awake()
         {
             _progress = new MetaProgressService(new PlayerPrefsProgressSaveGateway());
+            NormalizeSceneNames();
             _index = 0;
             RefreshAll();
             ShowCurrentItem();
@@ -82,7 +87,10 @@ namespace Game.Presentation.Runtime.Meta
             }
 
             bool isOwned = item.type != ShopItemType.GemPack && _progress.IsOwned(item.type, item.itemId);
-            if (buyButtonText != null) buyButtonText.text = isOwned ? "Owned" : "Buy";
+            if (buyButtonText != null)
+            {
+                buyButtonText.text = GetBuyButtonLabel(item, isOwned);
+            }
 
             feedbackText.text =
                 $"{item.displayName}\n" +
@@ -160,6 +168,22 @@ namespace Game.Presentation.Runtime.Meta
             return isOwned ? "Owned" : $"Cost: {item.price} {item.currency}";
         }
 
+        private string GetBuyButtonLabel(ShopItemSO item, bool isOwned)
+        {
+            if (item == null) return "Buy";
+            if (item.type == ShopItemType.GemPack) return "Buy";
+            if (!isOwned) return "Buy";
+
+            bool isSelected = item.type switch
+            {
+                ShopItemType.Pet => _progress.Data.selectedPetId == item.itemId,
+                ShopItemType.Outfit => _progress.Data.selectedOutfitId == item.itemId,
+                _ => false
+            };
+
+            return isSelected ? "Owned" : "Equip";
+        }
+
         private bool TrySpend(ShopCurrency currency, int price)
         {
             bool ok = currency switch
@@ -184,6 +208,23 @@ namespace Game.Presentation.Runtime.Meta
                 feedbackText.text = msg;
         }
 
-        public void BackToMenu() => SceneManager.LoadScene(menuSceneName);
+        public void BackToMenu()
+        {
+            NormalizeSceneNames();
+            SceneManager.LoadScene(hubSceneName);
+        }
+
+        private void OnValidate()
+        {
+            NormalizeSceneNames();
+        }
+
+        private void NormalizeSceneNames()
+        {
+            if (string.IsNullOrWhiteSpace(hubSceneName) || hubSceneName == "Menu" || hubSceneName == "Shop")
+            {
+                hubSceneName = HubSceneName;
+            }
+        }
     }
 }
