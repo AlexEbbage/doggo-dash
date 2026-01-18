@@ -27,6 +27,10 @@ namespace Game.Application.Ports
         public long lastEnergyTimestampUtc;
         public long lastXpTimestampUtc;
 
+        public int upgradeEnergyMax;
+        public int upgradeStartSpeed;
+        public int upgradeGemBonus;
+
         public string selectedPetId = "dog_default";
         public string selectedOutfitId = "outfit_default";
 
