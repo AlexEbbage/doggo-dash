@@ -1174,6 +1174,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1694206849}
   - component: {fileID: 1694206850}
+  - component: {fileID: 1694206851}
   m_Layer: 0
   m_Name: HubController
   m_TagString: Untagged
@@ -1219,6 +1220,18 @@ MonoBehaviour:
   tabChallenges: {fileID: 273188482}
   tabProgression: {fileID: 1385279683}
   gameSceneName: Game
+--- !u!114 &1694206851
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1694206848}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 71b2f04d69b64792a09cc6407998709b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!224 &1701294528 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 6532908367020877448, guid: ea990ab6d0c414844b0a9fe32523ef49,
