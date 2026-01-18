@@ -13,6 +13,7 @@ namespace Game.Presentation.Runtime.Run
         public RunStateControllerBehaviour runState = default!;
         public RunRewardTrackerBehaviour runRewards = default!;
         public ScoreDistanceControllerBehaviour scoreDistance = default!;
+        public EnergySpeedControllerBehaviour energy = default!;
 
         [Header("Optional UI")]
         public TMP_Text totalKibbleText;
@@ -42,6 +43,10 @@ namespace Game.Presentation.Runtime.Run
         {
             _save = new PlayerPrefsProgressSaveGateway();
             _data = _save.Load();
+            if (energy == null)
+            {
+                energy = FindObjectOfType<EnergySpeedControllerBehaviour>();
+            }
             InitializeChallenges();
             RefreshUI();
         }
@@ -85,6 +90,12 @@ namespace Game.Presentation.Runtime.Run
             }
 
             ApplyXpGain();
+
+            if (energy != null)
+            {
+                _data.energyCurrent = energy.EnergyCurrent;
+                _data.energyMax = energy.EnergyMax;
+            }
 
             _save.Save(_data);
             RefreshUI();
