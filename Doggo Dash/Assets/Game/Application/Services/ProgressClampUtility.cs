@@ -15,6 +15,10 @@ namespace Game.Application.Services
             if (data.energyMax < 1f) data.energyMax = 1f;
             if (data.energyCurrent < 0f) data.energyCurrent = 0f;
             if (data.energyCurrent > data.energyMax) data.energyCurrent = data.energyMax;
+
+            if (data.upgradeEnergyMax < 0) data.upgradeEnergyMax = 0;
+            if (data.upgradeStartSpeed < 0) data.upgradeStartSpeed = 0;
+            if (data.upgradeGemBonus < 0) data.upgradeGemBonus = 0;
         }
     }
 }
