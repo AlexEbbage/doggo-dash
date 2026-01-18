@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.Serialization;
 using TMPro;
 using Game.Infrastructure.Persistence;
 
@@ -7,8 +8,11 @@ namespace Game.Presentation.Runtime.Meta
 {
     public sealed class ShopSceneControllerBehaviour : MonoBehaviour
     {
+        private const string HubSceneName = "Hub";
+
         [Header("Scenes")]
-        public string menuSceneName = "Hub";
+        [FormerlySerializedAs("menuSceneName")]
+        public string hubSceneName = HubSceneName;
 
         [Header("Catalog")]
         public ShopCatalogSO catalog = default!;
@@ -29,6 +33,7 @@ namespace Game.Presentation.Runtime.Meta
         private void Awake()
         {
             _progress = new MetaProgressService(new PlayerPrefsProgressSaveGateway());
+            NormalizeSceneNames();
             _index = 0;
             RefreshAll();
             ShowCurrentItem();
@@ -184,6 +189,23 @@ namespace Game.Presentation.Runtime.Meta
                 feedbackText.text = msg;
         }
 
-        public void BackToMenu() => SceneManager.LoadScene(menuSceneName);
+        public void BackToMenu()
+        {
+            NormalizeSceneNames();
+            SceneManager.LoadScene(hubSceneName);
+        }
+
+        private void OnValidate()
+        {
+            NormalizeSceneNames();
+        }
+
+        private void NormalizeSceneNames()
+        {
+            if (string.IsNullOrWhiteSpace(hubSceneName) || hubSceneName == "Menu" || hubSceneName == "Shop")
+            {
+                hubSceneName = HubSceneName;
+            }
+        }
     }
 }
