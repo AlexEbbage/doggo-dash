@@ -87,8 +87,7 @@ namespace Game.Presentation.Runtime.UI
 
             IProgressSaveGateway save = new PlayerPrefsProgressSaveGateway();
             PlayerProgressData data = save.Load();
-            data.energyCurrent = energy.EnergyCurrent;
-            data.energyMax = energy.EnergyMax;
+            energy.ApplyEnergyTo(data);
             save.Save(data);
         }
     }

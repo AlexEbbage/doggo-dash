@@ -78,5 +78,13 @@ namespace Game.Presentation.Runtime.Run
         }
 
         public void ResetRun() => _useCase.Reset();
+
+        public void ApplyEnergyTo(PlayerProgressData data)
+        {
+            if (data == null) return;
+
+            data.energyCurrent = _useCase.EnergyCurrent;
+            data.energyMax = _useCase.EnergyMax;
+        }
     }
 }
