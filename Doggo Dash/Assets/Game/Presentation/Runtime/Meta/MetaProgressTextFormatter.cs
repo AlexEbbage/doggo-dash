@@ -22,7 +22,7 @@ namespace Game.Presentation.Runtime.Meta
             int completed = 0;
             int claimed = 0;
 
-            foreach (ChallengeProgressEntry entry in data.challengeProgress)
+            foreach (ChallengeProgress entry in data.challengeProgress)
             {
                 if (entry == null)
                 {

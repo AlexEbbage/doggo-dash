@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Game.Application.Services;
+using UnityEngine.Serialization;
 
 namespace Game.Application.Ports
 {
@@ -34,7 +35,7 @@ namespace Game.Application.Ports
         public long lastDailyChallengesResetUtc;
         public long lastWeeklyChallengesResetUtc;
 
-        public List<ChallengeProgressEntry> challengeProgress = new();
+        public List<ChallengeProgress> challengeProgress = new();
         public int upgradeEnergyMax;
         public int upgradeStartSpeed;
         public int upgradeGemBonus;
@@ -49,13 +50,14 @@ namespace Game.Application.Ports
     }
 
     [System.Serializable]
-    public sealed class ChallengeProgressEntry
+    public sealed class ChallengeProgress
     {
         public string id = string.Empty;
         public ChallengeMetric type;
         public float target;
         public float current;
-        public long lastResetUtcSeconds;
+        [FormerlySerializedAs("lastResetUtcSeconds")]
+        public long lastReset;
         public float progress;
         public bool completed;
         public bool rewardClaimed;
