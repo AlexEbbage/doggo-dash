@@ -81,13 +81,13 @@ namespace Game.Presentation.Runtime.Meta
                 return;
             }
 
-            bool isOwned = _progress.IsOwned(item.type, item.itemId);
+            bool isOwned = item.type != ShopItemType.GemPack && _progress.IsOwned(item.type, item.itemId);
             if (buyButtonText != null) buyButtonText.text = isOwned ? "Owned" : "Buy";
 
             feedbackText.text =
                 $"{item.displayName}\n" +
                 $"{item.type}\n" +
-                $"{(isOwned ? "Owned" : $"Cost: {item.price} {item.currency}")}";
+                $"{BuildItemDetails(item, isOwned)}";
         }
 
         public void BuyOrSelectCurrent()
@@ -96,6 +96,12 @@ namespace Game.Presentation.Runtime.Meta
             if (item == null)
             {
                 SetFeedback("No item selected.");
+                return;
+            }
+
+            if (item.type == ShopItemType.GemPack)
+            {
+                HandleGemPackPurchase(item);
                 return;
             }
 
@@ -120,6 +126,38 @@ namespace Game.Presentation.Runtime.Meta
 
             RefreshAll();
             ShowCurrentItem();
+        }
+
+        private void HandleGemPackPurchase(ShopItemSO item)
+        {
+            if (item.currency == ShopCurrency.Gems)
+            {
+                SetFeedback("Gem packs cannot be purchased with gems.");
+                return;
+            }
+
+            bool paid = item.price <= 0 || TrySpend(item.currency, item.price);
+            if (!paid) return;
+
+            int gemAmount = Mathf.Max(0, item.gemAmount);
+            _progress.AddGems(gemAmount);
+            SetFeedback(gemAmount > 0
+                ? $"Purchased {gemAmount} gems!"
+                : "Purchased gem pack.");
+
+            RefreshAll();
+            ShowCurrentItem();
+        }
+
+        private static string BuildItemDetails(ShopItemSO item, bool isOwned)
+        {
+            if (item.type == ShopItemType.GemPack)
+            {
+                string amountText = item.gemAmount > 0 ? $"Includes {item.gemAmount} gems\n" : string.Empty;
+                return $"{amountText}Cost: {item.price} {item.currency}";
+            }
+
+            return isOwned ? "Owned" : $"Cost: {item.price} {item.currency}";
         }
 
         private bool TrySpend(ShopCurrency currency, int price)

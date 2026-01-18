@@ -11,7 +11,8 @@ namespace Game.Presentation.Runtime.Meta
     public enum ShopItemType
     {
         Pet,
-        Outfit
+        Outfit,
+        GemPack
     }
 
     [CreateAssetMenu(menuName = "Game/Meta/Shop Item", fileName = "ShopItem")]
@@ -28,5 +29,8 @@ namespace Game.Presentation.Runtime.Meta
         [Header("Cost")]
         public ShopCurrency currency = ShopCurrency.Kibble;
         [Min(0)] public int price = 0;
+
+        [Header("Gem Pack")]
+        [Min(0)] public int gemAmount = 0;
     }
 }
