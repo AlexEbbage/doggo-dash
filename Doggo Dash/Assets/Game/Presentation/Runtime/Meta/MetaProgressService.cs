@@ -14,7 +14,7 @@ namespace Game.Presentation.Runtime.Meta
         {
             _save = save;
             _data = _save.Load();
-            ProgressClampUtility.ClampProgress(_data);
+            ClampProgressSafely();
         }
 
         public PlayerProgressData Data => _data;
@@ -22,12 +22,12 @@ namespace Game.Presentation.Runtime.Meta
         public void Reload()
         {
             _data = _save.Load();
-            ProgressClampUtility.ClampProgress(_data);
+            ClampProgressSafely();
         }
 
         public void Save()
         {
-            ProgressClampUtility.ClampProgress(_data);
+            ClampProgressSafely();
             _save.Save(_data);
         }
 
@@ -58,7 +58,7 @@ namespace Game.Presentation.Runtime.Meta
 
         public void SetSelectedPet(string petId)
         {
-            string resolvedId = string.IsNullOrWhiteSpace(petId) ? "dog_default" : petId;
+            string resolvedId = string.IsNullOrWhiteSpace(petId) ? PlayerProgressData.DefaultPetId : petId;
             bool changed = _data.selectedPetId != resolvedId;
             _data.selectedPetId = resolvedId;
             changed |= EnsureOwned(ShopItemType.Pet, resolvedId);
@@ -67,7 +67,7 @@ namespace Game.Presentation.Runtime.Meta
 
         public void SetSelectedOutfit(string outfitId)
         {
-            string resolvedId = string.IsNullOrWhiteSpace(outfitId) ? "outfit_default" : outfitId;
+            string resolvedId = string.IsNullOrWhiteSpace(outfitId) ? PlayerProgressData.DefaultOutfitId : outfitId;
             bool changed = _data.selectedOutfitId != resolvedId;
             _data.selectedOutfitId = resolvedId;
             changed |= EnsureOwned(ShopItemType.Outfit, resolvedId);
@@ -77,14 +77,12 @@ namespace Game.Presentation.Runtime.Meta
         public bool IsOwned(string itemId)
         {
             if (string.IsNullOrWhiteSpace(itemId)) return false;
-            return IsOwned(ShopItemType.Pet, itemId) || IsOwned(ShopItemType.Outfit, itemId);
+            return IsOwnedSafe(ShopItemType.Pet, itemId) || IsOwnedSafe(ShopItemType.Outfit, itemId);
         }
 
         public bool IsOwned(ShopItemType type, string itemId)
         {
-            if (string.IsNullOrWhiteSpace(itemId)) return false;
-            if (type == ShopItemType.GemPack) return false;
-            return GetOwnedList(type).Contains(itemId);
+            return IsOwnedSafe(type, itemId);
         }
 
         public void GrantOwnership(string itemId)
@@ -109,6 +107,20 @@ namespace Game.Presentation.Runtime.Meta
             if (list.Contains(itemId)) return false;
             list.Add(itemId);
             return true;
+        }
+
+        private void ClampProgressSafely()
+        {
+            if (_data == null) return;
+            ProgressClampUtility.ClampProgress(_data);
+        }
+
+        private bool IsOwnedSafe(ShopItemType type, string itemId)
+        {
+            if (string.IsNullOrWhiteSpace(itemId)) return false;
+            if (type == ShopItemType.GemPack) return false;
+            List<string> list = GetOwnedList(type);
+            return list != null && list.Contains(itemId);
         }
 
         private List<string> GetOwnedList(ShopItemType type)

@@ -11,6 +11,9 @@ namespace Game.Application.Ports
     [System.Serializable]
     public sealed class PlayerProgressData
     {
+        public const string DefaultPetId = "dog_default";
+        public const string DefaultOutfitId = "outfit_default";
+
         public int totalKibble;
         public int totalGems;
 
@@ -35,11 +38,13 @@ namespace Game.Application.Ports
         public int upgradeStartSpeed;
         public int upgradeGemBonus;
 
-        public string selectedPetId = "dog_default";
-        public string selectedOutfitId = "outfit_default";
+        public string selectedPetId = DefaultPetId;
+        public string selectedOutfitId = DefaultOutfitId;
 
         public List<string> ownedPets = new List<string>();
         public List<string> ownedOutfits = new List<string>();
+
+        public bool adRemoved;
     }
 
     [System.Serializable]

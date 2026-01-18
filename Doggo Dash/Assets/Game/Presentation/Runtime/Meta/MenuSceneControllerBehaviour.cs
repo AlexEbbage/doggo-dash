@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.Serialization;
 using TMPro;
 using Game.Application.Ports;
 using Game.Infrastructure.Persistence;
@@ -8,9 +9,14 @@ namespace Game.Presentation.Runtime.Meta
 {
     public sealed class MenuSceneControllerBehaviour : MonoBehaviour
     {
+        private const string HubSceneName = "Hub";
+        private const string GameSceneName = "Game";
+
         [Header("Scenes")]
-        public string gameSceneName = "Game";
-        public string shopSceneName = "Hub";
+        public string gameSceneName = GameSceneName;
+
+        [FormerlySerializedAs("shopSceneName")]
+        public string hubSceneName = HubSceneName;
 
         [Header("UI")]
         public TMP_Text totalKibbleText;
@@ -23,6 +29,7 @@ namespace Game.Presentation.Runtime.Meta
         private void Awake()
         {
             _progress = new MetaProgressService(new PlayerPrefsProgressSaveGateway());
+            NormalizeSceneNames();
             Refresh();
         }
 
@@ -39,8 +46,41 @@ namespace Game.Presentation.Runtime.Meta
             if (bestDistanceText != null) bestDistanceText.text = $"{Mathf.FloorToInt(d.bestDistanceMeters)}m";
         }
 
-        public void Play() => SceneManager.LoadScene(gameSceneName);
-        public void OpenShop() => SceneManager.LoadScene(shopSceneName);
+        public void Play()
+        {
+            if (string.IsNullOrWhiteSpace(gameSceneName))
+            {
+                Debug.LogWarning("Game scene name is not set.", this);
+                return;
+            }
+
+            SceneManager.LoadScene(gameSceneName);
+        }
+
+        public void OpenShop()
+        {
+            NormalizeSceneNames();
+            SceneManager.LoadScene(hubSceneName);
+        }
+
         public void Quit() => UnityEngine.Application.Quit();
+
+        private void OnValidate()
+        {
+            NormalizeSceneNames();
+        }
+
+        private void NormalizeSceneNames()
+        {
+            if (string.IsNullOrWhiteSpace(gameSceneName))
+            {
+                gameSceneName = GameSceneName;
+            }
+
+            if (string.IsNullOrWhiteSpace(hubSceneName) || hubSceneName == "Menu" || hubSceneName == "Shop")
+            {
+                hubSceneName = HubSceneName;
+            }
+        }
     }
 }
