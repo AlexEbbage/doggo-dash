@@ -39,8 +39,6 @@ namespace Game.Application.Ports
         public int upgradeStartSpeed;
         public int upgradeGemBonus;
 
-        public string selectedPetId = "dog_default";
-        public string selectedOutfitId = "outfit_default";
         public string selectedPetId = DefaultPetId;
         public string selectedOutfitId = DefaultOutfitId;
 
