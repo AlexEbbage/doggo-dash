@@ -3,6 +3,7 @@ using Game.Application.Ports;
 using Game.Application.Services;
 using Game.Domain.Entities;
 using Game.Domain.ValueObjects;
+using Game.Infrastructure.Persistence;
 
 namespace Game.Presentation.Runtime.Run
 {
@@ -22,12 +23,19 @@ namespace Game.Presentation.Runtime.Run
 
         public float Energy01 => _useCase.Energy01;
         public float SpeedMultiplier => _useCase.CurrentSpeedMultiplier;
+        public float EnergyCurrent => _useCase.EnergyCurrent;
+        public float EnergyMax => _useCase.EnergyMax;
 
         private void Awake()
         {
+            IProgressSaveGateway save = new PlayerPrefsProgressSaveGateway();
+            PlayerProgressData data = save.Load();
+            float maxEnergy = data.energyMax > 0f ? data.energyMax : config.maxEnergy;
+            float currentEnergy = Mathf.Clamp(data.energyCurrent, 0f, maxEnergy);
+
             var appConfig = new EnergySpeedConfig
             {
-                MaxEnergy = config.maxEnergy,
+                MaxEnergy = maxEnergy,
                 DrainPerSecond = config.drainPerSecond,
                 TreatRestore = config.treatRestore,
                 BadFoodEnergyPenalty = config.badFoodEnergyPenalty,
@@ -38,7 +46,7 @@ namespace Game.Presentation.Runtime.Run
 
             var energy = new EnergyState(appConfig.MaxEnergy);
             _useCase = new EnergySpeedUseCase(appConfig, energy, runState);
-            _useCase.Reset();
+            _useCase.Initialize(appConfig.MaxEnergy, currentEnergy);
         }
 
         private void Update()

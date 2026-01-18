@@ -24,6 +24,10 @@ namespace Game.Presentation.Runtime.Meta
         [SerializeField] private Image avatarImage;
         [SerializeField] private GameObject avatarPlaceholder;
 
+        [Header("Selections")]
+        [SerializeField] private TMP_Text selectedPetText;
+        [SerializeField] private TMP_Text selectedOutfitText;
+
         [Header("Settings")]
         [SerializeField] private Button settingsButton;
         [SerializeField] private GameObject settingsPanel;
@@ -110,6 +114,16 @@ namespace Game.Presentation.Runtime.Meta
             if (avatarImage != null && avatarPlaceholder != null)
             {
                 avatarPlaceholder.SetActive(avatarImage.sprite == null);
+            }
+
+            if (selectedPetText != null)
+            {
+                selectedPetText.text = $"Pet: {data.selectedPetId}";
+            }
+
+            if (selectedOutfitText != null)
+            {
+                selectedOutfitText.text = $"Outfit: {data.selectedOutfitId}";
             }
         }
 
@@ -202,6 +216,16 @@ namespace Game.Presentation.Runtime.Meta
             if (xpText == null)
             {
                 xpText = FindTextByName("XpText");
+            }
+
+            if (selectedPetText == null)
+            {
+                selectedPetText = FindTextByName("SelectedPetText");
+            }
+
+            if (selectedOutfitText == null)
+            {
+                selectedOutfitText = FindTextByName("SelectedOutfitText");
             }
 
             _referencesCached = kibbleText != null

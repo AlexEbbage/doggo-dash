@@ -13,6 +13,7 @@ namespace Game.Presentation.Runtime.Run
         public RunStateControllerBehaviour runState = default!;
         public RunRewardTrackerBehaviour runRewards = default!;
         public ScoreDistanceControllerBehaviour scoreDistance = default!;
+        public EnergySpeedControllerBehaviour energy = default!;
 
         [Header("Optional UI")]
         public TMP_Text totalKibbleText;
@@ -42,6 +43,10 @@ namespace Game.Presentation.Runtime.Run
         {
             _save = new PlayerPrefsProgressSaveGateway();
             _data = _save.Load();
+            if (energy == null)
+            {
+                energy = FindObjectOfType<EnergySpeedControllerBehaviour>();
+            }
             InitializeChallenges();
             RefreshUI();
         }
@@ -84,7 +89,14 @@ namespace Game.Presentation.Runtime.Run
                 _challenges.ApplyRunResults(distance, treats, gems, badFoodHits);
             }
 
-            ApplyXpGain();
+            int xpGain = ComputeXpGain();
+            ApplyXpGain(xpGain);
+
+            if (energy != null)
+            {
+                _data.energyCurrent = energy.EnergyCurrent;
+                _data.energyMax = energy.EnergyMax;
+            }
 
             _save.Save(_data);
             RefreshUI();
@@ -128,7 +140,7 @@ namespace Game.Presentation.Runtime.Run
             if (bestDistanceText != null) bestDistanceText.text = $"{Mathf.FloorToInt(_data.bestDistanceMeters)}m";
         }
 
-        private void ApplyXpGain()
+        private int ComputeXpGain()
         {
             int xpGain = 0;
             if (runRewards != null)
@@ -141,6 +153,11 @@ namespace Game.Presentation.Runtime.Run
                 xpGain += Mathf.FloorToInt(scoreDistance.DistanceMeters * xpPerMeter);
             }
 
+            return xpGain;
+        }
+
+        private void ApplyXpGain(int xpGain)
+        {
             if (xpGain <= 0) return;
 
             if (_data.level <= 0) _data.level = 1;
@@ -153,6 +170,8 @@ namespace Game.Presentation.Runtime.Run
                 _data.xp -= _data.xpToNext;
                 _data.level += 1;
             }
+
+            _data.lastXpTimestampUtc = System.DateTimeOffset.UtcNow.ToUnixTimeSeconds();
         }
     }
 }

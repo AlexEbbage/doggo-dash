@@ -39,6 +39,10 @@ namespace Game.Presentation.Runtime.Meta
         public Vector3 unselectedScale = Vector3.one;
         public Color selectedColor = Color.white;
         public Color unselectedColor = new Color(1f, 1f, 1f, 0.6f);
+        public bool includeChildGraphics = true;
+        public bool swapSpriteOnSelect = false;
+        public Sprite selectedSprite = default!;
+        public Sprite unselectedSprite = default!;
 
         [Header("Page Transitions (optional)")]
         public bool enablePageTransitions = true;
@@ -96,12 +100,69 @@ namespace Game.Presentation.Runtime.Meta
                 return;
             }
 
-            button.transform.localScale = selected ? selectedScale : unselectedScale;
-            Color targetColor = selected ? selectedColor : unselectedColor;
-
-            foreach (Graphic graphic in button.GetComponentsInChildren<Graphic>(true))
+            if (selected)
             {
-                graphic.color = targetColor;
+                SetSelectedVisuals(button);
+            }
+            else
+            {
+                SetUnselectedVisuals(button);
+            }
+        }
+
+        public void SetSelectedVisuals(Button button)
+        {
+            if (button == null)
+            {
+                return;
+            }
+
+            button.transform.localScale = selectedScale;
+            ApplyVisualColors(button, selectedColor);
+            ApplySpriteSwap(button, selectedSprite);
+        }
+
+        public void SetUnselectedVisuals(Button button)
+        {
+            if (button == null)
+            {
+                return;
+            }
+
+            button.transform.localScale = unselectedScale;
+            ApplyVisualColors(button, unselectedColor);
+            ApplySpriteSwap(button, unselectedSprite);
+        }
+
+        private void ApplyVisualColors(Button button, Color color)
+        {
+            if (includeChildGraphics)
+            {
+                foreach (Graphic graphic in button.GetComponentsInChildren<Graphic>(true))
+                {
+                    graphic.color = color;
+                }
+
+                return;
+            }
+
+            if (button.targetGraphic != null)
+            {
+                button.targetGraphic.color = color;
+            }
+        }
+
+        private void ApplySpriteSwap(Button button, Sprite sprite)
+        {
+            if (!swapSpriteOnSelect || sprite == null)
+            {
+                return;
+            }
+
+            Image image = button.image;
+            if (image != null)
+            {
+                image.sprite = sprite;
             }
         }
 
@@ -136,6 +197,11 @@ namespace Game.Presentation.Runtime.Meta
 
             CanvasGroup canvasGroup = page.GetComponent<CanvasGroup>();
             RectTransform rectTransform = page.GetComponent<RectTransform>();
+
+            if (enablePageTransitions && canvasGroup == null)
+            {
+                canvasGroup = page.AddComponent<CanvasGroup>();
+            }
 
             if (!isActive)
             {
