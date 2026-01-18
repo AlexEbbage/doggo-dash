@@ -87,7 +87,10 @@ namespace Game.Presentation.Runtime.Meta
             }
 
             bool isOwned = item.type != ShopItemType.GemPack && _progress.IsOwned(item.type, item.itemId);
-            if (buyButtonText != null) buyButtonText.text = isOwned ? "Owned" : "Buy";
+            if (buyButtonText != null)
+            {
+                buyButtonText.text = GetBuyButtonLabel(item, isOwned);
+            }
 
             feedbackText.text =
                 $"{item.displayName}\n" +
@@ -163,6 +166,22 @@ namespace Game.Presentation.Runtime.Meta
             }
 
             return isOwned ? "Owned" : $"Cost: {item.price} {item.currency}";
+        }
+
+        private string GetBuyButtonLabel(ShopItemSO item, bool isOwned)
+        {
+            if (item == null) return "Buy";
+            if (item.type == ShopItemType.GemPack) return "Buy";
+            if (!isOwned) return "Buy";
+
+            bool isSelected = item.type switch
+            {
+                ShopItemType.Pet => _progress.Data.selectedPetId == item.itemId,
+                ShopItemType.Outfit => _progress.Data.selectedOutfitId == item.itemId,
+                _ => false
+            };
+
+            return isSelected ? "Owned" : "Equip";
         }
 
         private bool TrySpend(ShopCurrency currency, int price)
