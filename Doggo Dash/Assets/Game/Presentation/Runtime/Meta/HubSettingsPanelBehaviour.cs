@@ -140,7 +140,7 @@ namespace Game.Presentation.Runtime.Meta
         {
             if (!string.IsNullOrWhiteSpace(privacyTermsUrl))
             {
-                Application.OpenURL(privacyTermsUrl);
+                UnityEngine.Application.OpenURL(privacyTermsUrl);
                 return;
             }
 
