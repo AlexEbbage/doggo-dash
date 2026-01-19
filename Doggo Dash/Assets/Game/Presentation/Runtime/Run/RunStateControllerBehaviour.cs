@@ -24,6 +24,12 @@ namespace Game.Presentation.Runtime.Run
 
         public bool IsFailed { get; private set; }
 
+        private void Awake()
+        {
+            if (feedback == null)
+                feedback = FindObjectOfType<RunFeedbackControllerBehaviour>();
+        }
+
         public void OnRunFailed(RunFailReason reason, ObstacleType? obstacleType = null)
         {
             if (IsFailed) return;

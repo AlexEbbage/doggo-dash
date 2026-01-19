@@ -29,6 +29,12 @@ namespace Game.Presentation.Runtime.Run
         public bool IsStumbling => _stumbleRemaining > 0f;
         public bool IsInvulnerable => _invulnRemaining > 0f;
 
+        private void Awake()
+        {
+            if (feedback == null)
+                feedback = FindObjectOfType<RunFeedbackControllerBehaviour>();
+        }
+
         public float SpeedMultiplier
         {
             get
