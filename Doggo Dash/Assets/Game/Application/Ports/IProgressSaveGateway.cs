@@ -16,6 +16,8 @@ namespace Game.Application.Ports
         public const string DefaultPetId = "dog_default";
         public const string DefaultOutfitId = "outfit_default";
 
+        public int progressVersion;
+
         public int totalKibble;
         public int totalGems;
 
