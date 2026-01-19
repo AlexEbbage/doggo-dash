@@ -12,4 +12,29 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5f49a1625062ae143bb76b2528f01754, type: 3}
   m_Name: VfxCatalog
   m_EditorClassIdentifier: 
-  entries: []
+
+  entries:
+  - id: PickupTreat
+    prefab: {fileID: 353087463176351263, guid: 5db17239087744b28290ba80e1b76c96, type: 3}
+    lifetimeSeconds: 1.25
+  - id: PickupGem
+    prefab: {fileID: 408150461459163539, guid: 751dd5ff9b2349c6a498bd65c4f7df81, type: 3}
+    lifetimeSeconds: 1.25
+  - id: PickupBadFood
+    prefab: {fileID: 307756968985086519, guid: 91a4660693ad423a98338956f92d2d00, type: 3}
+    lifetimeSeconds: 1.25
+  - id: PickupZoomies
+    prefab: {fileID: 271252776395584249, guid: d2423156d0fb4a58b114c1712763c9eb, type: 3}
+    lifetimeSeconds: 1.5
+  - id: ZoomiesTrailStart
+    prefab: {fileID: 903966051156486029, guid: 38a29c080292495db786693205a4526d, type: 3}
+    lifetimeSeconds: 2
+  - id: ZoomiesTrailEnd
+    prefab: {fileID: 135977097795973112, guid: d2723ac782924d81b34c93fc32af62ea, type: 3}
+    lifetimeSeconds: 2
+  - id: StumbleBurst
+    prefab: {fileID: 792581304662916472, guid: b21dbda86c5645758bb3c082aa044f91, type: 3}
+    lifetimeSeconds: 1.5
+  - id: GameOverBurst
+    prefab: {fileID: 499105362630065597, guid: df55f3ecbb1b4830bd43de8621c01315, type: 3}
+    lifetimeSeconds: 2.5

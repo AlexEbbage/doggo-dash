@@ -14,6 +14,8 @@ namespace Game.Presentation.Runtime.FX
 
         GameOver,
 
+        UiClick,
+
         AmbienceFarm
     }
 }

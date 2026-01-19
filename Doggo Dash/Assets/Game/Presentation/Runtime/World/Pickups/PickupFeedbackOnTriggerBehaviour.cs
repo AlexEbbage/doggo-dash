@@ -13,6 +13,8 @@ namespace Game.Presentation.Runtime.World.Pickups
         private void Awake()
         {
             _pickup = GetComponent<PickupView>();
+            if (feedback == null)
+                feedback = FindObjectOfType<RunFeedbackControllerBehaviour>();
         }
 
         private void OnTriggerEnter(Collider other)
