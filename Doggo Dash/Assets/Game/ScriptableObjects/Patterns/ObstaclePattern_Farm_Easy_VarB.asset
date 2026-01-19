@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 69a3ea784714c6e42b35b15789263224, type: 3}
+  m_Name: ObstaclePattern_Farm_Easy_VarB
+  m_EditorClassIdentifier: 
+  rows:
+  - zOffset: 12
+    lanes: 4
+    obstacleId: RockFull
+    chance: 0.35
+  - zOffset: 18
+    lanes: 1
+    obstacleId: FenceHigh
+    chance: 0.35
+  - zOffset: 24
+    lanes: 2
+    obstacleId: BranchLow
+    chance: 0.4
+  - zOffset: 28
+    lanes: 7
+    obstacleId: RockFull
+    chance: 0.2
