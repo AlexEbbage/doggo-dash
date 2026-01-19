@@ -267,7 +267,7 @@ namespace Game.Infrastructure.Persistence
             EnsureOwned(data.ownedOutfits, data.selectedOutfitId);
         }
 
-        private static void EnsureOwned(List<string> ownedList, string itemId)
+        private static bool EnsureOwned(List<string> ownedList, string itemId)
         {
             if (ownedList == null) return false;
             if (string.IsNullOrWhiteSpace(itemId)) return false;
