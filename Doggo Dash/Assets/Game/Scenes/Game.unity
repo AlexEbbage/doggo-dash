@@ -200,6 +200,7 @@ GameObject:
   m_Component:
   - component: {fileID: 32949053}
   - component: {fileID: 32949052}
+  - component: {fileID: 32949054}
   m_Layer: 0
   m_Name: RunState
   m_TagString: Untagged
@@ -222,7 +223,21 @@ MonoBehaviour:
   runnerControllerBehaviour: {fileID: 1703875499}
   collisionReporterBehaviour: {fileID: 1703875497}
   feedback: {fileID: 0}
+  analyticsReporter: {fileID: 32949054}
   freezeTimeOnFail: 0
+--- !u!114 &32949054
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 32949051}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6d0b6f2b54f64d7a92c7e51c3b94a779, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  scoreDistance: {fileID: 385129244}
 --- !u!4 &32949053
 Transform:
   m_ObjectHideFlags: 0
