@@ -18,7 +18,7 @@ MonoBehaviour:
     weight: 1
   - prefab: {fileID: 6390910283253651830, guid: 7c8449f4a22bf5745b404e29b22391e8,
       type: 3}
-    weight: 0.9
+    weight: 0.85
   - prefab: {fileID: 7755186631106604756, guid: 0d94a85bc6edeb2448c9e7bd28bae53e,
       type: 3}
     weight: 0.7
@@ -28,60 +28,60 @@ MonoBehaviour:
     weight: 1
   - prefab: {fileID: 6390910283253651830, guid: 7c8449f4a22bf5745b404e29b22391e8,
       type: 3}
-    weight: 0.9
+    weight: 0.85
   - prefab: {fileID: 7755186631106604756, guid: 0d94a85bc6edeb2448c9e7bd28bae53e,
       type: 3}
     weight: 0.7
   centerPrefabs:
-  - prefab: {fileID: 6390910283253651830, guid: 7c8449f4a22bf5745b404e29b22391e8,
-      type: 3}
-    weight: 1
-  - prefab: {fileID: 7755186631106604756, guid: 0d94a85bc6edeb2448c9e7bd28bae53e,
-      type: 3}
-    weight: 0.8
   - prefab: {fileID: 5028619545003702080, guid: 0d0b653cf1f1bc247a79348e328d4c1c,
       type: 3}
-    weight: 0.6
+    weight: 1
+  - prefab: {fileID: 6390910283253651830, guid: 7c8449f4a22bf5745b404e29b22391e8,
+      type: 3}
+    weight: 0.85
+  - prefab: {fileID: 7755186631106604756, guid: 0d94a85bc6edeb2448c9e7bd28bae53e,
+      type: 3}
+    weight: 0.7
   raisedLeftPrefabs:
   - prefab: {fileID: 5028619545003702080, guid: 0d0b653cf1f1bc247a79348e328d4c1c,
       type: 3}
-    weight: 0.9
+    weight: 1
   - prefab: {fileID: 6390910283253651830, guid: 7c8449f4a22bf5745b404e29b22391e8,
       type: 3}
-    weight: 0.8
+    weight: 0.85
   - prefab: {fileID: 7755186631106604756, guid: 0d94a85bc6edeb2448c9e7bd28bae53e,
       type: 3}
-    weight: 0.6
+    weight: 0.7
   raisedRightPrefabs:
   - prefab: {fileID: 5028619545003702080, guid: 0d0b653cf1f1bc247a79348e328d4c1c,
       type: 3}
-    weight: 0.9
+    weight: 1
   - prefab: {fileID: 6390910283253651830, guid: 7c8449f4a22bf5745b404e29b22391e8,
       type: 3}
-    weight: 0.8
+    weight: 0.85
   - prefab: {fileID: 7755186631106604756, guid: 0d94a85bc6edeb2448c9e7bd28bae53e,
-      type: 3}
-    weight: 0.6
-  backgroundNearPrefabs:
-  - prefab: {fileID: 6390910283253651830, guid: 7c8449f4a22bf5745b404e29b22391e8,
       type: 3}
     weight: 0.7
+  backgroundNearPrefabs:
   - prefab: {fileID: 5028619545003702080, guid: 0d0b653cf1f1bc247a79348e328d4c1c,
       type: 3}
-    weight: 0.6
-  - prefab: {fileID: 7755186631106604756, guid: 0d94a85bc6edeb2448c9e7bd28bae53e,
-      type: 3}
-    weight: 0.5
-  backgroundFarPrefabs:
+    weight: 1
   - prefab: {fileID: 6390910283253651830, guid: 7c8449f4a22bf5745b404e29b22391e8,
       type: 3}
-    weight: 0.6
-  - prefab: {fileID: 5028619545003702080, guid: 0d0b653cf1f1bc247a79348e328d4c1c,
-      type: 3}
-    weight: 0.5
+    weight: 0.85
   - prefab: {fileID: 7755186631106604756, guid: 0d94a85bc6edeb2448c9e7bd28bae53e,
       type: 3}
-    weight: 0.4
-  globalSpawnMultiplier: 0.65
-  positionJitterXZ: 0.15
-  minSeparation: 1
+    weight: 0.7
+  backgroundFarPrefabs:
+  - prefab: {fileID: 5028619545003702080, guid: 0d0b653cf1f1bc247a79348e328d4c1c,
+      type: 3}
+    weight: 1
+  - prefab: {fileID: 6390910283253651830, guid: 7c8449f4a22bf5745b404e29b22391e8,
+      type: 3}
+    weight: 0.85
+  - prefab: {fileID: 7755186631106604756, guid: 0d94a85bc6edeb2448c9e7bd28bae53e,
+      type: 3}
+    weight: 0.7
+  globalSpawnMultiplier: 0.55
+  positionJitterXZ: 0.1
+  minSeparation: 1.4
