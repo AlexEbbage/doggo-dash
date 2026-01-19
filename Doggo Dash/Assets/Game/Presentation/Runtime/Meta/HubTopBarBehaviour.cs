@@ -37,6 +37,8 @@ namespace Game.Presentation.Runtime.Meta
         private MetaProgressService _progress = default!;
         private bool _settingsBound;
         private bool _referencesCached;
+        private Sprite _defaultSprite;
+        private Sprite _checkmarkSprite;
 
         private void Awake()
         {
@@ -167,13 +169,15 @@ namespace Game.Presentation.Runtime.Meta
 
         public void OpenSettingsOverlay()
         {
+            if (settingsPanel == null)
+            {
+                settingsPanel = CreateSettingsPanel();
+            }
+
             if (settingsPanel != null)
             {
                 settingsPanel.SetActive(true);
-                return;
             }
-
-            Debug.Log("Settings overlay stub.");
         }
 
         private void CacheReferences(bool force = false)
@@ -303,6 +307,148 @@ namespace Game.Presentation.Runtime.Meta
             }
 
             return child.GetComponent<TMP_Text>();
+        }
+
+        private GameObject CreateSettingsPanel()
+        {
+            Canvas canvas = GetComponentInParent<Canvas>();
+            Transform parent = canvas != null ? canvas.transform : transform;
+            GameObject panel = new GameObject("SettingsPanel", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+            RectTransform panelRect = panel.GetComponent<RectTransform>();
+            panelRect.SetParent(parent, false);
+            panelRect.anchorMin = new Vector2(0.5f, 0.5f);
+            panelRect.anchorMax = new Vector2(0.5f, 0.5f);
+            panelRect.sizeDelta = new Vector2(520f, 360f);
+            panelRect.anchoredPosition = Vector2.zero;
+
+            Image panelImage = panel.GetComponent<Image>();
+            panelImage.color = new Color(0f, 0f, 0f, 0.85f);
+
+            TMP_Text title = CreateText(panel.transform, "Title", "Settings", new Vector2(0f, 135f), new Vector2(360f, 40f), 36);
+            title.alignment = TextAlignmentOptions.Center;
+
+            TMP_Text soundLabel = CreateText(panel.transform, "SoundLabel", "Sound", new Vector2(-110f, 70f), new Vector2(200f, 30f), 28);
+            soundLabel.alignment = TextAlignmentOptions.MidlineLeft;
+            Toggle soundToggle = CreateToggle(panel.transform, "SoundToggle", new Vector2(150f, 70f));
+
+            TMP_Text musicLabel = CreateText(panel.transform, "MusicLabel", "Music", new Vector2(-110f, 20f), new Vector2(200f, 30f), 28);
+            musicLabel.alignment = TextAlignmentOptions.MidlineLeft;
+            Toggle musicToggle = CreateToggle(panel.transform, "MusicToggle", new Vector2(150f, 20f));
+
+            Button privacyButton = CreateButton(panel.transform, "PrivacyButton", new Vector2(0f, -60f), new Vector2(300f, 44f), "Privacy & Terms");
+            TMP_Text privacyLabel = privacyButton.GetComponentInChildren<TMP_Text>();
+
+            Button closeButton = CreateButton(panel.transform, "CloseButton", new Vector2(0f, -125f), new Vector2(200f, 40f), "Close");
+
+            HubSettingsPanelBehaviour panelBehaviour = panel.AddComponent<HubSettingsPanelBehaviour>();
+            panelBehaviour.Configure(soundToggle, musicToggle, privacyButton, closeButton, privacyLabel);
+
+            return panel;
+        }
+
+        private TMP_Text CreateText(Transform parent, string name, string value, Vector2 anchoredPosition, Vector2 size, int fontSize)
+        {
+            GameObject textObject = new GameObject(name, typeof(RectTransform), typeof(TextMeshProUGUI));
+            RectTransform rectTransform = textObject.GetComponent<RectTransform>();
+            rectTransform.SetParent(parent, false);
+            rectTransform.anchorMin = new Vector2(0.5f, 0.5f);
+            rectTransform.anchorMax = new Vector2(0.5f, 0.5f);
+            rectTransform.sizeDelta = size;
+            rectTransform.anchoredPosition = anchoredPosition;
+
+            TextMeshProUGUI text = textObject.GetComponent<TextMeshProUGUI>();
+            text.text = value;
+            text.fontSize = fontSize;
+            text.color = Color.white;
+            text.alignment = TextAlignmentOptions.Center;
+            if (TMP_Settings.defaultFontAsset != null)
+            {
+                text.font = TMP_Settings.defaultFontAsset;
+            }
+
+            return text;
+        }
+
+        private Toggle CreateToggle(Transform parent, string name, Vector2 anchoredPosition)
+        {
+            GameObject toggleObject = new GameObject(name, typeof(RectTransform), typeof(Toggle));
+            RectTransform rectTransform = toggleObject.GetComponent<RectTransform>();
+            rectTransform.SetParent(parent, false);
+            rectTransform.anchorMin = new Vector2(0.5f, 0.5f);
+            rectTransform.anchorMax = new Vector2(0.5f, 0.5f);
+            rectTransform.sizeDelta = new Vector2(52f, 28f);
+            rectTransform.anchoredPosition = anchoredPosition;
+
+            GameObject backgroundObject = new GameObject("Background", typeof(RectTransform), typeof(Image));
+            RectTransform backgroundRect = backgroundObject.GetComponent<RectTransform>();
+            backgroundRect.SetParent(toggleObject.transform, false);
+            backgroundRect.anchorMin = Vector2.zero;
+            backgroundRect.anchorMax = Vector2.one;
+            backgroundRect.sizeDelta = Vector2.zero;
+            Image backgroundImage = backgroundObject.GetComponent<Image>();
+            backgroundImage.sprite = GetDefaultSprite();
+            backgroundImage.color = new Color(1f, 1f, 1f, 0.2f);
+
+            GameObject checkmarkObject = new GameObject("Checkmark", typeof(RectTransform), typeof(Image));
+            RectTransform checkmarkRect = checkmarkObject.GetComponent<RectTransform>();
+            checkmarkRect.SetParent(backgroundObject.transform, false);
+            checkmarkRect.anchorMin = new Vector2(0.2f, 0.2f);
+            checkmarkRect.anchorMax = new Vector2(0.8f, 0.8f);
+            checkmarkRect.sizeDelta = Vector2.zero;
+            Image checkmarkImage = checkmarkObject.GetComponent<Image>();
+            checkmarkImage.sprite = GetCheckmarkSprite();
+            checkmarkImage.color = new Color(0.2f, 0.9f, 0.4f, 1f);
+
+            Toggle toggle = toggleObject.GetComponent<Toggle>();
+            toggle.targetGraphic = backgroundImage;
+            toggle.graphic = checkmarkImage;
+
+            return toggle;
+        }
+
+        private Button CreateButton(Transform parent, string name, Vector2 anchoredPosition, Vector2 size, string label)
+        {
+            GameObject buttonObject = new GameObject(name, typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
+            RectTransform rectTransform = buttonObject.GetComponent<RectTransform>();
+            rectTransform.SetParent(parent, false);
+            rectTransform.anchorMin = new Vector2(0.5f, 0.5f);
+            rectTransform.anchorMax = new Vector2(0.5f, 0.5f);
+            rectTransform.sizeDelta = size;
+            rectTransform.anchoredPosition = anchoredPosition;
+
+            Image image = buttonObject.GetComponent<Image>();
+            image.sprite = GetDefaultSprite();
+            image.color = new Color(1f, 1f, 1f, 0.15f);
+
+            Button button = buttonObject.GetComponent<Button>();
+            TMP_Text labelText = CreateText(buttonObject.transform, "Label", label, Vector2.zero, size, 24);
+            RectTransform labelRect = labelText.GetComponent<RectTransform>();
+            labelRect.anchorMin = Vector2.zero;
+            labelRect.anchorMax = Vector2.one;
+            labelRect.sizeDelta = Vector2.zero;
+            labelRect.anchoredPosition = Vector2.zero;
+
+            return button;
+        }
+
+        private Sprite GetDefaultSprite()
+        {
+            if (_defaultSprite == null)
+            {
+                _defaultSprite = Resources.GetBuiltinResource<Sprite>("UI/Skin/UISprite.psd");
+            }
+
+            return _defaultSprite;
+        }
+
+        private Sprite GetCheckmarkSprite()
+        {
+            if (_checkmarkSprite == null)
+            {
+                _checkmarkSprite = Resources.GetBuiltinResource<Sprite>("UI/Skin/Checkmark.psd");
+            }
+
+            return _checkmarkSprite;
         }
     }
 }
