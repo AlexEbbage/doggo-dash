@@ -13,21 +13,17 @@ MonoBehaviour:
   m_Name: PickupPattern_Farm_Easy
   m_EditorClassIdentifier: 
   rows:
-  - zOffset: 8
-    lanes: -1
+  - zOffset: 6
+    lanes: 7
     type: 0
     amount: 1
   - zOffset: 12
     lanes: 2
-    type: 2
-    amount: 1
-  - zOffset: 16
-    lanes: -1
-    type: 0
-    amount: 1
-  - zOffset: 20
-    lanes: 1
     type: 1
+    amount: 1
+  - zOffset: 18
+    lanes: 2
+    type: 2
     amount: 1
   - zOffset: 24
     lanes: 4

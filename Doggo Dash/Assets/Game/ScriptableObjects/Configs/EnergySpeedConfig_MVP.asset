@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: EnergySpeedConfig_MVP
   m_EditorClassIdentifier: 
   maxEnergy: 100
-  drainPerSecond: 2.5
-  treatRestore: 10
+  drainPerSecond: 2
+  treatRestore: 1.5
   badFoodEnergyPenalty: 12
   badFoodSlowMultiplier: 0.75
   badFoodSlowDuration: 1.25
