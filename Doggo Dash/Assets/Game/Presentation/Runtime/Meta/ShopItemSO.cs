@@ -32,5 +32,8 @@ namespace Game.Presentation.Runtime.Meta
 
         [Header("Gem Pack")]
         [Min(0)] public int gemAmount = 0;
+
+        [Header("IAP")]
+        public string iapProductId = string.Empty;
     }
 }

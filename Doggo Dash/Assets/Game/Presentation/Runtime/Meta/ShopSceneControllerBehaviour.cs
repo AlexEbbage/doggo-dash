@@ -3,6 +3,8 @@ using UnityEngine.SceneManagement;
 using UnityEngine.Serialization;
 using TMPro;
 using Game.Infrastructure.Persistence;
+using Game.Application.Ports;
+using Game.Application.Services;
 
 namespace Game.Presentation.Runtime.Meta
 {
@@ -27,12 +29,17 @@ namespace Game.Presentation.Runtime.Meta
         public TMP_Text feedbackText;
         public TMP_Text buyButtonText;
 
+        [Header("IAP")]
+        public MonoBehaviour iapServiceBehaviour;
+
         private MetaProgressService _progress = default!;
+        private IIapService _iapService = default!;
         private int _index;
 
         private void Awake()
         {
             _progress = new MetaProgressService(new PlayerPrefsProgressSaveGateway());
+            _iapService = ResolveIapService();
             NormalizeSceneNames();
             _index = 0;
             RefreshAll();
@@ -157,6 +164,27 @@ namespace Game.Presentation.Runtime.Meta
 
         private void HandleGemPackPurchase(ShopItemSO item)
         {
+            if (!string.IsNullOrWhiteSpace(item.iapProductId))
+            {
+                if (!_iapService.CanPurchase(item.iapProductId))
+                {
+                    SetFeedback("Purchases unavailable.");
+                    return;
+                }
+
+                _iapService.Purchase(item.iapProductId, success =>
+                {
+                    if (!success)
+                    {
+                        SetFeedback("Purchase canceled.");
+                        return;
+                    }
+
+                    GrantGemPack(item);
+                });
+                return;
+            }
+
             if (item.currency == ShopCurrency.Gems)
             {
                 SetFeedback("Gem packs cannot be purchased with gems.");
@@ -166,6 +194,11 @@ namespace Game.Presentation.Runtime.Meta
             bool paid = item.price <= 0 || TrySpend(item.currency, item.price);
             if (!paid) return;
 
+            GrantGemPack(item);
+        }
+
+        private void GrantGemPack(ShopItemSO item)
+        {
             int gemAmount = Mathf.Max(0, item.gemAmount);
             _progress.AddGems(gemAmount);
             SetFeedback(gemAmount > 0
@@ -181,6 +214,11 @@ namespace Game.Presentation.Runtime.Meta
             if (item.type == ShopItemType.GemPack)
             {
                 string amountText = item.gemAmount > 0 ? $"Includes {item.gemAmount} gems\n" : string.Empty;
+                if (!string.IsNullOrWhiteSpace(item.iapProductId))
+                {
+                    return $"{amountText}Cost: IAP";
+                }
+
                 return $"{amountText}Cost: {item.price} {item.currency}";
             }
 
@@ -244,6 +282,16 @@ namespace Game.Presentation.Runtime.Meta
             {
                 hubSceneName = HubSceneName;
             }
+        }
+
+        private IIapService ResolveIapService()
+        {
+            if (iapServiceBehaviour != null && iapServiceBehaviour is IIapService service)
+            {
+                return service;
+            }
+
+            return new IapService();
         }
     }
 }

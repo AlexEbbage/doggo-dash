@@ -3,6 +3,7 @@ using Game.Application.Services;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using Game.Infrastructure.Persistence;
 
 namespace Game.Presentation.Runtime.Meta
 {
@@ -13,11 +14,24 @@ namespace Game.Presentation.Runtime.Meta
         [SerializeField] private Button removeAdsButton;
         [SerializeField] private TMP_Text feedbackText;
 
+        [Header("Rewarded Ad")]
+        [SerializeField] private int rewardedGemAmount = 25;
+
+        [Header("IAP")]
+        [SerializeField] private string removeAdsProductId = "remove_ads";
+        [SerializeField] private MonoBehaviour iapServiceBehaviour;
+        [SerializeField] private MonoBehaviour rewardedAdsProviderBehaviour;
+
         private IAdsService _adsService = default!;
+        private MetaProgressService _progress = default!;
 
         private void Awake()
         {
-            _adsService = new AdsService();
+            var saveGateway = new PlayerPrefsProgressSaveGateway();
+            var iapService = ResolveIapService();
+            var rewardedProvider = ResolveRewardedAdsProvider();
+            _adsService = new AdsService(saveGateway, iapService, rewardedProvider, removeAdsProductId);
+            _progress = new MetaProgressService(saveGateway);
             WireButtons();
             RefreshButtons();
         }
@@ -49,7 +63,23 @@ namespace Game.Presentation.Runtime.Meta
 
             _adsService.ShowRewardedAd(success =>
             {
-                SetFeedback(success ? "Rewarded ad completed." : "Rewarded ad skipped.");
+                if (success)
+                {
+                    if (rewardedGemAmount > 0)
+                    {
+                        _progress.AddGems(rewardedGemAmount);
+                        SetFeedback($"Rewarded ad completed. +{rewardedGemAmount} gems!");
+                    }
+                    else
+                    {
+                        SetFeedback("Rewarded ad completed.");
+                    }
+                }
+                else
+                {
+                    SetFeedback("Rewarded ad skipped.");
+                }
+
                 RefreshButtons();
             });
         }
@@ -82,6 +112,26 @@ namespace Game.Presentation.Runtime.Meta
         {
             if (feedbackText != null)
                 feedbackText.text = message;
+        }
+
+        private IIapService ResolveIapService()
+        {
+            if (iapServiceBehaviour != null && iapServiceBehaviour is IIapService service)
+            {
+                return service;
+            }
+
+            return new IapService();
+        }
+
+        private IRewardedAdsProvider ResolveRewardedAdsProvider()
+        {
+            if (rewardedAdsProviderBehaviour != null && rewardedAdsProviderBehaviour is IRewardedAdsProvider provider)
+            {
+                return provider;
+            }
+
+            return new NullRewardedAdsProvider();
         }
     }
 }
