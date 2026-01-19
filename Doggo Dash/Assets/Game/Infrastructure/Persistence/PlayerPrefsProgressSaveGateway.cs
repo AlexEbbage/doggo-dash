@@ -12,6 +12,7 @@ namespace Game.Infrastructure.Persistence
         private const int DefaultLevel = 1;
         private const int DefaultXpToNext = 100;
         private const float DefaultEnergyMax = 100f;
+        private const int CurrentProgressVersion = 1;
 
         public bool TryLoadValidated(out PlayerProgressData data, out bool needsSave)
         {
@@ -33,7 +34,9 @@ namespace Game.Infrastructure.Persistence
                     return false;
                 }
 
-                needsSave = ApplyDefaults(data);
+                bool migrated = ApplyMigrations(data);
+                bool defaulted = ApplyDefaults(data);
+                needsSave = migrated || defaulted;
                 return true;
             }
             catch
@@ -53,8 +56,8 @@ namespace Game.Infrastructure.Persistence
             try
             {
                 PlayerProgressData data = JsonUtility.FromJson<PlayerProgressData>(json) ?? new PlayerProgressData();
-                ApplyDefaults(data);
                 ApplyMigrations(data);
+                ApplyDefaults(data);
                 return data;
             }
             catch
@@ -79,8 +82,8 @@ namespace Game.Infrastructure.Persistence
         private static PlayerProgressData CreateDefaultData()
         {
             var data = new PlayerProgressData();
-            ApplyDefaults(data);
             ApplyMigrations(data);
+            ApplyDefaults(data);
             return data;
         }
 
@@ -246,28 +249,44 @@ namespace Game.Infrastructure.Persistence
             return utcDate.AddDays(-diff);
         }
 
-        private static void ApplyMigrations(PlayerProgressData data)
+        private static bool ApplyMigrations(PlayerProgressData data)
         {
-            if (data == null) return;
+            if (data == null) return false;
+            bool changed = false;
 
-            data.ownedPets ??= new List<string>();
-            data.ownedOutfits ??= new List<string>();
-
-            if (string.IsNullOrWhiteSpace(data.selectedPetId))
+            int version = data.progressVersion;
+            if (version < 1)
             {
-                data.selectedPetId = PlayerProgressData.DefaultPetId;
+                data.ownedPets ??= new List<string>();
+                data.ownedOutfits ??= new List<string>();
+
+                if (string.IsNullOrWhiteSpace(data.selectedPetId))
+                {
+                    data.selectedPetId = PlayerProgressData.DefaultPetId;
+                }
+
+                if (string.IsNullOrWhiteSpace(data.selectedOutfitId))
+                {
+                    data.selectedOutfitId = PlayerProgressData.DefaultOutfitId;
+                }
+
+                EnsureOwned(data.ownedPets, data.selectedPetId);
+                EnsureOwned(data.ownedOutfits, data.selectedOutfitId);
+                version = 1;
+                changed = true;
             }
 
-            if (string.IsNullOrWhiteSpace(data.selectedOutfitId))
+            if (version != CurrentProgressVersion)
             {
-                data.selectedOutfitId = PlayerProgressData.DefaultOutfitId;
+                version = CurrentProgressVersion;
+                changed = true;
             }
 
-            EnsureOwned(data.ownedPets, data.selectedPetId);
-            EnsureOwned(data.ownedOutfits, data.selectedOutfitId);
+            data.progressVersion = version;
+            return changed;
         }
 
-        private static void EnsureOwned(List<string> ownedList, string itemId)
+        private static bool EnsureOwned(List<string> ownedList, string itemId)
         {
             if (ownedList == null) return false;
             if (string.IsNullOrWhiteSpace(itemId)) return false;

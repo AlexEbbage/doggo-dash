@@ -16,6 +16,9 @@ namespace Game.Presentation.Runtime.Run
         [Header("Feedback (optional)")]
         public RunFeedbackControllerBehaviour feedback;
 
+        [Header("Analytics (optional)")]
+        public RunAnalyticsReporter analyticsReporter;
+
         [Header("Debug")]
         public bool freezeTimeOnFail = false;
 
@@ -33,6 +36,7 @@ namespace Game.Presentation.Runtime.Run
             IsFailed = true;
 
             Debug.Log($"[Run] FAILED: {reason} ({obstacleType?.ToString() ?? "n/a"})");
+            analyticsReporter?.ReportRunFailed(reason, obstacleType);
 
             if (runnerControllerBehaviour != null)
                 runnerControllerBehaviour.enabled = false;

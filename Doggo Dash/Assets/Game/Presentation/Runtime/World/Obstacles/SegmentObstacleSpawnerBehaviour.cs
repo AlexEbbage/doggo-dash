@@ -19,8 +19,21 @@ namespace Game.Presentation.Runtime.World.Obstacles
         [Header("Spawn")]
         public Transform? spawnedRoot;
 
-        private readonly List<GameObject> _spawned = new();
+        private readonly List<SpawnedObstacle> _spawned = new();
+        private readonly Dictionary<ObstacleView, Stack<ObstacleView>> _pool = new();
         private TrackSegmentBehaviour? _segment;
+
+        private readonly struct SpawnedObstacle
+        {
+            public SpawnedObstacle(ObstacleView prefab, ObstacleView instance)
+            {
+                Prefab = prefab;
+                Instance = instance;
+            }
+
+            public ObstacleView Prefab { get; }
+            public ObstacleView Instance { get; }
+        }
 
         private void Awake()
         {
@@ -74,18 +87,46 @@ namespace Game.Presentation.Runtime.World.Obstacles
         private void SpawnInLane(ObstacleView prefab, Transform laneAnchor, float zOffset, Transform root)
         {
             Vector3 pos = laneAnchor.position + new Vector3(0f, 0f, zOffset);
-            var inst = Instantiate(prefab, pos, prefab.transform.rotation, root);
-            _spawned.Add(inst.gameObject);
+            var inst = Rent(prefab, root);
+            inst.transform.SetPositionAndRotation(pos, prefab.transform.rotation);
+            _spawned.Add(new SpawnedObstacle(prefab, inst));
         }
 
         private void Cleanup()
         {
             for (int i = 0; i < _spawned.Count; i++)
             {
-                if (_spawned[i] != null)
-                    Destroy(_spawned[i]);
+                if (_spawned[i].Instance != null)
+                    Return(_spawned[i].Prefab, _spawned[i].Instance);
             }
             _spawned.Clear();
+        }
+
+        private ObstacleView Rent(ObstacleView prefab, Transform parent)
+        {
+            if (_pool.TryGetValue(prefab, out var stack) && stack.Count > 0)
+            {
+                var inst = stack.Pop();
+                inst.gameObject.SetActive(true);
+                inst.transform.SetParent(parent, worldPositionStays: true);
+                return inst;
+            }
+
+            return Instantiate(prefab, parent);
+        }
+
+        private void Return(ObstacleView prefabKey, ObstacleView instance)
+        {
+            instance.gameObject.SetActive(false);
+            instance.transform.SetParent(null, worldPositionStays: true);
+
+            if (!_pool.TryGetValue(prefabKey, out var stack))
+            {
+                stack = new Stack<ObstacleView>();
+                _pool[prefabKey] = stack;
+            }
+
+            stack.Push(instance);
         }
     }
 }
