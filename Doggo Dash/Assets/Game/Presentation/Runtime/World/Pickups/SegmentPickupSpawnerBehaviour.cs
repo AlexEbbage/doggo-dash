@@ -54,12 +54,15 @@ namespace Game.Presentation.Runtime.World.Pickups
             Cleanup();
 
             if (_segment == null || _segment.laneSockets == null) return;
-            if (catalog == null || pattern == null || pattern.rows == null) return;
+            if (catalog == null || pattern == null) return;
 
             Transform root = spawnedRoot != null ? spawnedRoot : transform;
             float density = difficulty != null ? difficulty.DensityMultiplier : 1f;
 
-            foreach (var row in pattern.rows)
+            var rows = pattern.GetRows();
+            if (rows == null) return;
+
+            foreach (var row in rows)
             {
                 if (row == null) continue;
                 if (!catalog.TryGetPrefab(row.type, out var prefab)) continue;
