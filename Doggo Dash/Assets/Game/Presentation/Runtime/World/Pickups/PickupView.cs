@@ -20,6 +20,8 @@ namespace Game.Presentation.Runtime.World.Pickups
 
         private void Awake() => _startLocalPos = transform.localPosition;
 
+        public void ResetStartLocalPosition() => _startLocalPos = transform.localPosition;
+
         private void Update()
         {
             if (rotate)

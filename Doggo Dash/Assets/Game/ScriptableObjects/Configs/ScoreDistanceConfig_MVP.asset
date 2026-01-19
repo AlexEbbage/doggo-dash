@@ -12,6 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d63db6726726b56419ba8432dd3527bc, type: 3}
   m_Name: ScoreDistanceConfig_MVP
   m_EditorClassIdentifier: 
-  scorePerMeter: 1
+  scorePerMeter: 1.5
   baseMultiplier: 1
   maxMultiplier: 30

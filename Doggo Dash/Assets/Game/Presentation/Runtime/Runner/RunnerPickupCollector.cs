@@ -33,10 +33,18 @@ namespace Game.Presentation.Runtime.Runner
             {
                 _sink.OnPickupCollected(pickup.pickupType, pickup.amount);
 
-                if (destroyOnCollect)
+                if (pickup.TryGetComponent<PickupPoolHandle>(out var poolHandle))
+                {
+                    poolHandle.Release(pickup);
+                }
+                else if (destroyOnCollect)
+                {
                     Destroy(pickup.gameObject);
+                }
                 else
+                {
                     pickup.gameObject.SetActive(false);
+                }
             }
         }
     }
