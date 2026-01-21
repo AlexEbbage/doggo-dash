@@ -158,8 +158,8 @@ namespace DoggoDash.Vfx
             switch (curve.mode)
             {
                 case ParticleSystemCurveMode.TwoConstants:
-                    return new ParticleSystem.MinMaxCurve(curve.curveMultiplier,
-                        curve.constantMin * multiplier, curve.constantMax * multiplier);
+                    return new ParticleSystem.MinMaxCurve(curve.constantMin * multiplier,
+                        curve.constantMax * multiplier);
                 case ParticleSystemCurveMode.Constant:
                     return new ParticleSystem.MinMaxCurve(curve.constant * multiplier);
                 case ParticleSystemCurveMode.TwoCurves:

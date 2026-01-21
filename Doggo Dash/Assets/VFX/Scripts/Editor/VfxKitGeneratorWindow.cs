@@ -398,9 +398,9 @@ namespace DoggoDash.VfxEditor
             var main = system.main;
             main.duration = duration;
             main.loop = false;
-            main.startLifetime = new ParticleSystem.MinMaxCurve(1f, lifetimeMin, lifetimeMax);
-            main.startSpeed = new ParticleSystem.MinMaxCurve(1f, speedMin, speedMax);
-            main.startSize = new ParticleSystem.MinMaxCurve(1f, sizeMin, sizeMax);
+            main.startLifetime = new ParticleSystem.MinMaxCurve(lifetimeMin, lifetimeMax);
+            main.startSpeed = new ParticleSystem.MinMaxCurve(speedMin, speedMax);
+            main.startSize = new ParticleSystem.MinMaxCurve(sizeMin, sizeMax);
             main.simulationSpace = ParticleSystemSimulationSpace.World;
             main.stopAction = ParticleSystemStopAction.Destroy;
 
@@ -429,9 +429,9 @@ namespace DoggoDash.VfxEditor
             var main = system.main;
             main.duration = duration;
             main.loop = false;
-            main.startLifetime = new ParticleSystem.MinMaxCurve(1f, lifetimeMin, lifetimeMax);
-            main.startSpeed = new ParticleSystem.MinMaxCurve(1f, speedMin, speedMax);
-            main.startSize = new ParticleSystem.MinMaxCurve(1f, sizeMin, sizeMax);
+            main.startLifetime = new ParticleSystem.MinMaxCurve(lifetimeMin, lifetimeMax);
+            main.startSpeed = new ParticleSystem.MinMaxCurve(speedMin, speedMax);
+            main.startSize = new ParticleSystem.MinMaxCurve(sizeMin, sizeMax);
             main.simulationSpace = ParticleSystemSimulationSpace.World;
 
             var emission = system.emission;
@@ -459,9 +459,9 @@ namespace DoggoDash.VfxEditor
             var main = system.main;
             main.duration = duration;
             main.loop = false;
-            main.startLifetime = new ParticleSystem.MinMaxCurve(1f, lifetimeMin, lifetimeMax);
-            main.startSpeed = new ParticleSystem.MinMaxCurve(1f, speedMin, speedMax);
-            main.startSize = new ParticleSystem.MinMaxCurve(1f, sizeMin, sizeMax);
+            main.startLifetime = new ParticleSystem.MinMaxCurve(lifetimeMin, lifetimeMax);
+            main.startSpeed = new ParticleSystem.MinMaxCurve(speedMin, speedMax);
+            main.startSize = new ParticleSystem.MinMaxCurve(sizeMin, sizeMax);
             main.simulationSpace = ParticleSystemSimulationSpace.World;
             main.stopAction = ParticleSystemStopAction.Destroy;
 
@@ -494,9 +494,9 @@ namespace DoggoDash.VfxEditor
             var main = system.main;
             main.duration = 0.12f;
             main.loop = false;
-            main.startLifetime = new ParticleSystem.MinMaxCurve(1f, 0.04f, 0.07f);
-            main.startSpeed = new ParticleSystem.MinMaxCurve(1f, 0f, 0.3f);
-            main.startSize = new ParticleSystem.MinMaxCurve(1f, 0.18f, 0.45f);
+            main.startLifetime = new ParticleSystem.MinMaxCurve(0.04f, 0.07f);
+            main.startSpeed = new ParticleSystem.MinMaxCurve(0f, 0.3f);
+            main.startSize = new ParticleSystem.MinMaxCurve(0.18f, 0.45f);
             main.simulationSpace = ParticleSystemSimulationSpace.Local;
             main.stopAction = ParticleSystemStopAction.Destroy;
 
@@ -522,9 +522,9 @@ namespace DoggoDash.VfxEditor
             var main = system.main;
             main.duration = duration;
             main.loop = true;
-            main.startLifetime = new ParticleSystem.MinMaxCurve(1f, lifetimeMin, lifetimeMax);
-            main.startSpeed = new ParticleSystem.MinMaxCurve(1f, speedMin, speedMax);
-            main.startSize = new ParticleSystem.MinMaxCurve(1f, sizeMin, sizeMax);
+            main.startLifetime = new ParticleSystem.MinMaxCurve(lifetimeMin, lifetimeMax);
+            main.startSpeed = new ParticleSystem.MinMaxCurve(speedMin, speedMax);
+            main.startSize = new ParticleSystem.MinMaxCurve(sizeMin, sizeMax);
             main.simulationSpace = ParticleSystemSimulationSpace.World;
             main.maxParticles = maxParticles;
 
@@ -565,7 +565,7 @@ namespace DoggoDash.VfxEditor
             main.loop = false;
             main.startLifetime = lifetime;
             main.startSpeed = 0f;
-            main.startSize = new ParticleSystem.MinMaxCurve(1f, sizeMin, sizeMax);
+            main.startSize = new ParticleSystem.MinMaxCurve(sizeMin, sizeMax);
             main.simulationSpace = ParticleSystemSimulationSpace.World;
             main.stopAction = ParticleSystemStopAction.Destroy;
 
@@ -594,9 +594,9 @@ namespace DoggoDash.VfxEditor
             var main = system.main;
             main.duration = duration;
             main.loop = false;
-            main.startLifetime = new ParticleSystem.MinMaxCurve(1f, lifetimeMin, lifetimeMax);
-            main.startSpeed = new ParticleSystem.MinMaxCurve(1f, speedMin, speedMax);
-            main.startSize = new ParticleSystem.MinMaxCurve(1f, sizeMin, sizeMax);
+            main.startLifetime = new ParticleSystem.MinMaxCurve(lifetimeMin, lifetimeMax);
+            main.startSpeed = new ParticleSystem.MinMaxCurve(speedMin, speedMax);
+            main.startSize = new ParticleSystem.MinMaxCurve(sizeMin, sizeMax);
             main.simulationSpace = ParticleSystemSimulationSpace.World;
             main.stopAction = ParticleSystemStopAction.Destroy;
 
@@ -629,9 +629,9 @@ namespace DoggoDash.VfxEditor
             var main = system.main;
             main.duration = duration;
             main.loop = false;
-            main.startLifetime = new ParticleSystem.MinMaxCurve(1f, lifetimeMin, lifetimeMax);
-            main.startSpeed = new ParticleSystem.MinMaxCurve(1f, speedMin, speedMax);
-            main.startSize = new ParticleSystem.MinMaxCurve(1f, sizeMin, sizeMax);
+            main.startLifetime = new ParticleSystem.MinMaxCurve(lifetimeMin, lifetimeMax);
+            main.startSpeed = new ParticleSystem.MinMaxCurve(speedMin, speedMax);
+            main.startSize = new ParticleSystem.MinMaxCurve(sizeMin, sizeMax);
             main.simulationSpace = ParticleSystemSimulationSpace.World;
             main.gravityModifier = 1.2f;
             main.stopAction = ParticleSystemStopAction.Destroy;
@@ -685,9 +685,9 @@ namespace DoggoDash.VfxEditor
             var main = system.main;
             main.duration = 0.8f;
             main.loop = false;
-            main.startLifetime = new ParticleSystem.MinMaxCurve(1f, 0.3f, 0.9f);
-            main.startSpeed = new ParticleSystem.MinMaxCurve(1f, 0.2f, 1f);
-            main.startSize = new ParticleSystem.MinMaxCurve(1f, 0.03f, 0.1f);
+            main.startLifetime = new ParticleSystem.MinMaxCurve(0.3f, 0.9f);
+            main.startSpeed = new ParticleSystem.MinMaxCurve(0.2f, 1f);
+            main.startSize = new ParticleSystem.MinMaxCurve(0.03f, 0.1f);
             main.simulationSpace = ParticleSystemSimulationSpace.World;
             main.stopAction = ParticleSystemStopAction.Destroy;
 
@@ -726,9 +726,9 @@ namespace DoggoDash.VfxEditor
             var main = system.main;
             main.duration = 10f;
             main.loop = true;
-            main.startLifetime = new ParticleSystem.MinMaxCurve(1f, 4f, 9f);
-            main.startSpeed = new ParticleSystem.MinMaxCurve(1f, 0.02f, 0.08f);
-            main.startSize = new ParticleSystem.MinMaxCurve(1f, 0.03f, 0.08f);
+            main.startLifetime = new ParticleSystem.MinMaxCurve(4f, 9f);
+            main.startSpeed = new ParticleSystem.MinMaxCurve(0.02f, 0.08f);
+            main.startSize = new ParticleSystem.MinMaxCurve(0.03f, 0.08f);
             main.simulationSpace = ParticleSystemSimulationSpace.World;
             main.maxParticles = 250;
 
