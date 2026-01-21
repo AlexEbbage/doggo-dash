@@ -9,10 +9,11 @@ namespace DoggoDash.Vfx
 
         private readonly Dictionary<ParticleSystem, ParticleSystemCache> _particleCache = new();
         private readonly Dictionary<ParticleSystemRenderer, RendererCache> _rendererCache = new();
-        private readonly MaterialPropertyBlock _propertyBlock = new();
+        private MaterialPropertyBlock _propertyBlock;
 
         private void Awake()
         {
+            _propertyBlock = new MaterialPropertyBlock();
             ApplyProfile();
         }
 
@@ -136,6 +137,7 @@ namespace DoggoDash.Vfx
                 var role = settings.ColorRole;
                 var tint = ResolveColor(role, profile) * profile.Intensity;
 
+                _propertyBlock ??= new MaterialPropertyBlock();
                 renderer.GetPropertyBlock(_propertyBlock);
                 _propertyBlock.SetColor("_BaseColor", tint);
                 renderer.SetPropertyBlock(_propertyBlock);
