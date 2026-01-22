@@ -11,6 +11,15 @@ namespace Game.Presentation.Runtime.FX
         [Header("Spawn anchors")]
         public Transform runnerAnchor;
 
+        private void Awake()
+        {
+            if (audioPlayer == null)
+                audioPlayer = FindObjectOfType<AudioPlayerBehaviour>();
+
+            if (vfxSpawner == null)
+                vfxSpawner = FindObjectOfType<VfxSpawnerBehaviour>();
+        }
+
         public void PlayPickupTreat(Vector3 at) { audioPlayer?.Play(SfxId.PickupTreat); vfxSpawner?.Spawn(VfxId.PickupTreat, at); }
         public void PlayPickupGem(Vector3 at) { audioPlayer?.Play(SfxId.PickupGem); vfxSpawner?.Spawn(VfxId.PickupGem, at); }
         public void PlayPickupBadFood(Vector3 at) { audioPlayer?.Play(SfxId.PickupBadFood); vfxSpawner?.Spawn(VfxId.PickupBadFood, at); }
