@@ -47,11 +47,11 @@ namespace Game.Presentation.Runtime.World.Obstacles
         }
 
         private void OnEnable() => SpawnAll();
-        private void OnDisable() => Cleanup();
+        private void OnDisable() => Cleanup(detachFromParent: false);
 
         private void SpawnAll()
         {
-            Cleanup();
+            Cleanup(detachFromParent: true);
 
             if (_segment == null || _segment.laneSockets == null) return;
             if (catalog == null || pattern == null) return;
@@ -95,12 +95,12 @@ namespace Game.Presentation.Runtime.World.Obstacles
             _spawned.Add(new SpawnedObstacle(prefab, inst));
         }
 
-        private void Cleanup()
+        private void Cleanup(bool detachFromParent)
         {
             for (int i = 0; i < _spawned.Count; i++)
             {
                 if (_spawned[i].Instance != null)
-                    Return(_spawned[i].Prefab, _spawned[i].Instance);
+                    Return(_spawned[i].Prefab, _spawned[i].Instance, detachFromParent);
             }
             _spawned.Clear();
         }
@@ -118,10 +118,11 @@ namespace Game.Presentation.Runtime.World.Obstacles
             return Instantiate(prefab, parent);
         }
 
-        private void Return(ObstacleView prefabKey, ObstacleView instance)
+        private void Return(ObstacleView prefabKey, ObstacleView instance, bool detachFromParent)
         {
             instance.gameObject.SetActive(false);
-            instance.transform.SetParent(null, worldPositionStays: true);
+            if (detachFromParent)
+                instance.transform.SetParent(null, worldPositionStays: true);
 
             if (!_pool.TryGetValue(prefabKey, out var stack))
             {
