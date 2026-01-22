@@ -149,8 +149,10 @@ namespace Game.Presentation.Runtime.World.Pickups
 
         private void Return(PickupView prefabKey, PickupView instance)
         {
+            Transform currentParent = instance.transform.parent;
             instance.gameObject.SetActive(false);
-            instance.transform.SetParent(null, worldPositionStays: true);
+            if (currentParent != null && currentParent.gameObject.activeInHierarchy)
+                instance.transform.SetParent(null, worldPositionStays: true);
 
             if (!_pool.TryGetValue(prefabKey, out var stack))
             {
