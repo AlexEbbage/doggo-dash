@@ -222,6 +222,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   runnerControllerBehaviour: {fileID: 1703875499}
   collisionReporterBehaviour: {fileID: 1703875497}
+  runReset: {fileID: 2100000002}
   feedback: {fileID: 900000000000000005}
   analyticsReporter: {fileID: 32949054}
   freezeTimeOnFail: 0
@@ -777,6 +778,8 @@ Transform:
   - {fileID: 433403040}
   - {fileID: 1793432187}
   - {fileID: 1111221892}
+  - {fileID: 2100000001}
+  - {fileID: 2100000011}
   - {fileID: 1637106526}
   - {fileID: 32949053}
   - {fileID: 385129243}
@@ -924,6 +927,112 @@ MonoBehaviour:
     m_MipBias: 0
     m_VarianceClampScale: 0.9
     m_ContrastAdaptiveSharpening: 0
+--- !u!1 &2100000000
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2100000001}
+  - component: {fileID: 2100000002}
+  m_Layer: 0
+  m_Name: RunReset
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2100000001
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2100000000}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 297989465}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2100000002
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2100000000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0bf1bffd3edc4095ba58bc06c6fcc357, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  energySpeed: {fileID: 382761527}
+  zoomies: {fileID: 1772392389}
+  rewardTracker: {fileID: 1111221893}
+  scoreDistance: {fileID: 385129244}
+  stumbleController: {fileID: 658349488}
+  runnerCollisionReporter: {fileID: 1703875497}
+--- !u!1 &2100000010
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2100000011}
+  - component: {fileID: 2100000012}
+  m_Layer: 0
+  m_Name: ProgressBank
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2100000011
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2100000010}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 297989465}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2100000012
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2100000010}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 02e0287ef6c838d449bf549777de46f3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  runState: {fileID: 32949052}
+  runRewards: {fileID: 1111221893}
+  scoreDistance: {fileID: 385129244}
+  energy: {fileID: 382761527}
+  totalKibbleText: {fileID: 0}
+  totalGemsText: {fileID: 0}
+  bestScoreText: {fileID: 0}
+  bestDistanceText: {fileID: 0}
+  xpPerMeter: 1
+  xpPerKibble: 1
+  fallbackXpToNext: 100
+  challengeData: {fileID: 0}
 --- !u!1 &331885959
 GameObject:
   m_ObjectHideFlags: 0
@@ -2916,8 +3025,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   runState: {fileID: 32949052}
+  runReset: {fileID: 2100000002}
   rewards: {fileID: 1111221893}
   scoreDistance: {fileID: 385129244}
+  energy: {fileID: 382761527}
   panelRoot: {fileID: 2017892174}
   summaryText: {fileID: 707802011}
 --- !u!114 &1683695812
@@ -2932,7 +3043,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d81ea36c253bf66419d8527f3716e50e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  energy: {fileID: 0}
+  energy: {fileID: 382761527}
   rewards: {fileID: 1111221893}
   scoreDistance: {fileID: 385129244}
   energyFill: {fileID: 0}
